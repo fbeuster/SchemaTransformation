@@ -1,6 +1,4 @@
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import schemaExtraction.extract.SchemaExtractor;
 
 public class Main {
 

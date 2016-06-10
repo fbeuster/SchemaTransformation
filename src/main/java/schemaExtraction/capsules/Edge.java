@@ -1,4 +1,4 @@
-package schema_extraction.capsules;
+package schemaExtraction.capsules;
 
 import java.io.Serializable;
 import java.util.TreeSet;
