@@ -9,7 +9,7 @@ import com.mongodb.client.MongoDatabase;
 import com.google.gson.JsonParser;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import schemaExtraction.App;
+import schemaExtraction.Extraction;
 import schemaExtraction.Configuration;
 
 import java.util.Calendar;
@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class SchemaExtractor {
 
-    private App main;
+    private Extraction main;
 
     private Calendar startTime;
 
@@ -37,7 +37,7 @@ public class SchemaExtractor {
     private String collection;
     private String datatabase;
 
-    public SchemaExtractor(App main, String database, String collection) {
+    public SchemaExtractor(Extraction main, String database, String collection) {
         this.main = main;
 
         this.collection = collection;

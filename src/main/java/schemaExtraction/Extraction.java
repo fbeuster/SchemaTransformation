@@ -6,10 +6,10 @@ import schemaExtraction.io.Storage;
 /**
  * Created by Felix Beuster on 10.06.2016.
  */
-public class App {
+public class Extraction {
     private Storage storage;
 
-    public App() {}
+    public Extraction() {}
 
     public Storage getStorage() {
         return storage;

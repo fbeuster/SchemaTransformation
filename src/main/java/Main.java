@@ -1,8 +1,8 @@
-import schemaExtraction.App;
+import schemaExtraction.Extraction;
 
 public class Main {
     public static void main(String[] args) {
-        App app = new App();
-        app.run();
+        Extraction extraction = new Extraction();
+        extraction.run();
     }
 }
