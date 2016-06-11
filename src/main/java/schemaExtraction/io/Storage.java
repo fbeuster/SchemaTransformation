@@ -61,33 +61,31 @@ public class Storage {
     }
 
     public int hasEdge(String name, String parentName, int level) {
-        int counter = -1;
+        int counter = 0;
 
         for (Edge it : edges) {
-            counter++;
-
             if (it.getChildName().equalsIgnoreCase(name)
                     && it.getParentName().equalsIgnoreCase(parentName)
                     && it.getChildLevel() == level) {
                 return counter;
             }
+            counter++;
         }
 
-        return counter;
+        return -1;
     }
 
     public int hasNode(String name, int level) {
-        int counter = -1;
+        int counter = 0;
 
         for (Node it : nodes) {
-            counter++;
-
             if (it.getName().equalsIgnoreCase(name) && it.getLevel() == level) {
                 return counter;
             }
+            counter++;
         }
 
-        return counter;
+        return -1;
     }
 
     public void printEdges(long docCount) {
