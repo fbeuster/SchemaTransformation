@@ -20,7 +20,7 @@ import java.util.Map;
  * Created by Jakob Langner
  * Implemented by Felix Beuster on 10.06.2016.
  */
-public class SchemaExtractor {
+public class Extractor {
 
     private Extraction main;
 
@@ -37,7 +37,7 @@ public class SchemaExtractor {
     private String collection;
     private String datatabase;
 
-    public SchemaExtractor(Extraction main, String database, String collection) {
+    public Extractor(Extraction main, String database, String collection) {
         this.main = main;
 
         this.collection = collection;

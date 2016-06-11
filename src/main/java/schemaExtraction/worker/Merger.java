@@ -10,14 +10,14 @@ import java.util.ArrayList;
  * Created by Jakob Langner
  * Implemented by Felix Beuster on 11.06.2016.
  */
-public class SchemaMerger {
+public class Merger {
 
     private ArrayList<Edge> mergeEdges;
     private ArrayList<Node> mergeNodes;
 
     private Storage mainStorage;
 
-    public SchemaMerger(Storage mainStorage) {
+    public Merger(Storage mainStorage) {
         this.mainStorage = mainStorage;
 
         mergeEdges = new ArrayList<>();

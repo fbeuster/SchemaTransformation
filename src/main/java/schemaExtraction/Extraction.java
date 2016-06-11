@@ -1,8 +1,8 @@
 package schemaExtraction;
 
-import schemaExtraction.worker.SchemaExtractor;
+import schemaExtraction.worker.Extractor;
 import schemaExtraction.io.Storage;
-import schemaExtraction.worker.SchemaMerger;
+import schemaExtraction.worker.Merger;
 import schemaExtraction.worker.Visualizer;
 
 import java.util.Calendar;
@@ -45,7 +45,7 @@ public class Extraction {
         System.out.println();
         System.out.println("######## Testarea for retrieving a MongoDB collection and iterating through the documents with the extractSchema algorithm ########");
 
-        SchemaExtractor se = new SchemaExtractor(this, database, collection);
+        Extractor se = new Extractor(this, database, collection);
         docCount = se.countDocs();
 
         Calendar startExtraction = Calendar.getInstance();
@@ -64,7 +64,7 @@ public class Extraction {
             System.out.println(storage.getNode(5).countDocId());
             System.out.println(newStorage.getNode(5).countDocId());
 
-            SchemaMerger sm = new SchemaMerger(storage);
+            Merger sm = new Merger(storage);
             sm.mergeWithStorage(newStorage);
 
             System.out.println(storage.getNode(5).countDocId());
