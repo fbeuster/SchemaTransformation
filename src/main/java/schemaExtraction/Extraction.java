@@ -47,5 +47,26 @@ public class Extraction {
         Visualizer visualizer = new Visualizer(storage, database);
         System.out.println(visualizer.toString());
         System.out.println();
+
+        saveAndLoad();
+    }
+
+    private void saveAndLoad() {
+        System.out.println("######## Testarea for storing and loading the internal schema to and from file ########");
+        System.out.println(storage.countNodes());
+        System.out.println(storage.countEdges());
+
+        Calendar startSaveAndLoad = Calendar.getInstance();
+        storage.saveToFile(Storage.DEFAULT_PATH, collection);
+        Calendar endSaveStartLoad = Calendar.getInstance();
+
+        storage.flush();
+        storage.loadFromFile(Storage.DEFAULT_PATH, collection);
+        Calendar endLoad = Calendar.getInstance();
+
+        Visualizer visualizer = new Visualizer(storage, database);
+        System.out.println(visualizer.toString());
+        System.out.println(storage.countNodes());
+        System.out.println(storage.countEdges());
     }
 }
