@@ -87,7 +87,7 @@ public class Visualizer {
                 }
 
                 // node contains array
-                if (propType.contains("JsonArray")) {
+                if (propType.contains("JsonArray") || propType.contains("class com.google.gson.JsonArray")) {
                     List<Edge> outgoingEdges = new ArrayList<>();
 
                     for (Edge e : storage.getEdges()) {
