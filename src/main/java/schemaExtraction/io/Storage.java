@@ -152,7 +152,6 @@ public class Storage {
     public void saveToFile(String filepath, String collectionName) {
         try {
             String nodes_path = filepath + File.separator + collectionName + File.separator + "nodes.sav";
-            System.out.println(nodes_path);
             String edges_path = filepath + File.separator + collectionName + File.separator + "edges.sav";
 
             File nodes_file = new File(nodes_path);
@@ -185,5 +184,11 @@ public class Storage {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void replace(ArrayList<Node> newNodes, ArrayList<Edge> newEdges) {
+        flush();
+        nodes = newNodes;
+        edges = newEdges;
     }
 }

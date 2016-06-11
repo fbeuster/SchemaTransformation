@@ -2,6 +2,7 @@ package schemaExtraction;
 
 import schemaExtraction.extract.SchemaExtractor;
 import schemaExtraction.io.Storage;
+import schemaExtraction.update.SchemaMerger;
 import schemaExtraction.visualize.Visualizer;
 
 import java.util.Calendar;
@@ -37,6 +38,7 @@ public class Extraction {
         printObjects();
         visualize();
         saveAndLoad();
+        merge("thesis_data_userMerge");
     }
 
     private void extract() {
@@ -52,6 +54,26 @@ public class Extraction {
         se.close();
     }
 
+    private void merge(String collectionName) {
+        if (Configuration.MERGE_STORAGES) {
+            System.out.println("######## Testarea for merging 2 schemes ########");
+
+            Storage newStorage = new Storage();
+            newStorage.loadFromFile(Storage.DEFAULT_PATH, collectionName);
+
+            System.out.println(storage.getNode(5).countDocId());
+            System.out.println(newStorage.getNode(5).countDocId());
+
+            SchemaMerger sm = new SchemaMerger(storage);
+            sm.mergeWithStorage(newStorage);
+
+            System.out.println(storage.getNode(5).countDocId());
+            System.out.println(newStorage.getNode(5).countDocId());
+
+            visualize();
+        }
+    }
+
     private void printObjects() {
         if (Configuration.PRINT_NODES_EDGES) {
             storage.printNodes(docCount);
@@ -61,8 +83,6 @@ public class Extraction {
 
     private void saveAndLoad() {
         System.out.println("######## Testarea for storing and loading the internal schema to and from file ########");
-        System.out.println(storage.countNodes());
-        System.out.println(storage.countEdges());
 
         Calendar startSaveAndLoad = Calendar.getInstance();
         storage.saveToFile(Storage.DEFAULT_PATH, collection);
