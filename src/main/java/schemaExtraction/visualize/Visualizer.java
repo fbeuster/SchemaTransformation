@@ -153,8 +153,14 @@ public class Visualizer {
         }
 
         for (Node n : storage.getNodes()) {
-            if (n.getLevel() == 1 && n.countDocId() == docCount) {
-                requiredProperties.add(n.getName());
+            if (n.getLevel() == 1) {
+                if (!properties.containsKey(n.getName())) {
+                    properties.append(n.getName(), elementToDocument(n.getName(), docCount, 1));
+                }
+
+                if (n.countDocId() == docCount) {
+                    requiredProperties.add(n.getName());
+                }
             }
         }
 
