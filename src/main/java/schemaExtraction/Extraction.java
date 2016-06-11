@@ -1,6 +1,6 @@
 package schemaExtraction;
 
-import schemaExtraction.extract.SchemaExtractor;
+import schemaExtraction.worker.SchemaExtractor;
 import schemaExtraction.io.Storage;
 import schemaExtraction.update.SchemaMerger;
 import schemaExtraction.visualize.Visualizer;

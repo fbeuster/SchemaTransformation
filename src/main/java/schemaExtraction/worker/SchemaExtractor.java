@@ -1,4 +1,4 @@
-package schemaExtraction.extract;
+package schemaExtraction.worker;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -71,7 +71,7 @@ public class SchemaExtractor {
                 docId = doc.get("_id").toString();
             }
 
-            // extract method call for document schema extraction
+            // extraction method call for document schema extraction
             extractFromJsonDocument(parser.parse(doc.toJson()), collection, "", docId, 0);
         }
     }
