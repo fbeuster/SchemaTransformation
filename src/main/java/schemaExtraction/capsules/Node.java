@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.TreeSet;
 
 /**
- * Created by Jakob Langner
+ * Created by Jacob Langner
  * Implemented by Felix Beuster on 10.06.2016.
  */
 public class Node implements Serializable {

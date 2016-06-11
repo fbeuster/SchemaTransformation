@@ -9,6 +9,7 @@ import java.util.Calendar;
 
 /**
  * Created by Felix Beuster on 10.06.2016.
+ * Based on work of Jacob Langner
  */
 public class Extraction {
 

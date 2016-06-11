@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 /**
- * Created by Jakob Langner
+ * Created by Jacob Langner
  * Implemented by Felix Beuster on 11.06.2016.
  */
 public class Visualizer {

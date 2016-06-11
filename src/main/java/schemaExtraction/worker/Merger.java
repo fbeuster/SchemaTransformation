@@ -7,7 +7,7 @@ import schemaExtraction.io.Storage;
 import java.util.ArrayList;
 
 /**
- * Created by Jakob Langner
+ * Created by Jacob Langner
  * Implemented by Felix Beuster on 11.06.2016.
  */
 public class Merger {

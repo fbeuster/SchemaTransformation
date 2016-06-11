@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Felix Beuster on 10.06.2016.
+ * Based on work of Jacob Langner
  */
 public class Storage {
 

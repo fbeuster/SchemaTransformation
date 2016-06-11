@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Created by Jakob Langner
+ * Created by Jacob Langner
  * Implemented by Felix Beuster on 10.06.2016.
  */
 public class Extractor {
