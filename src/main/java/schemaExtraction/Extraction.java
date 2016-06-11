@@ -2,8 +2,8 @@ package schemaExtraction;
 
 import schemaExtraction.worker.SchemaExtractor;
 import schemaExtraction.io.Storage;
-import schemaExtraction.update.SchemaMerger;
-import schemaExtraction.visualize.Visualizer;
+import schemaExtraction.worker.SchemaMerger;
+import schemaExtraction.worker.Visualizer;
 
 import java.util.Calendar;
 

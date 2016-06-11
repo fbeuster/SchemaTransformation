@@ -1,4 +1,4 @@
-package schemaExtraction.update;
+package schemaExtraction.worker;
 
 import schemaExtraction.capsules.Edge;
 import schemaExtraction.capsules.Node;
