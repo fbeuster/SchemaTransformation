@@ -82,17 +82,19 @@ public class Extraction {
     }
 
     private void saveAndLoad() {
-        System.out.println("######## Testarea for storing and loading the internal schema to and from file ########");
+        if (Configuration.SAVE_AND_LOAD) {
+            System.out.println("######## Testarea for storing and loading the internal schema to and from file ########");
 
-        Calendar startSaveAndLoad = Calendar.getInstance();
-        storage.saveToFile(Storage.DEFAULT_PATH, collection);
-        Calendar endSaveStartLoad = Calendar.getInstance();
+            Calendar startSaveAndLoad = Calendar.getInstance();
+            storage.saveToFile(Storage.DEFAULT_PATH, collection);
+            Calendar endSaveStartLoad = Calendar.getInstance();
 
-        storage.flush();
-        storage.loadFromFile(Storage.DEFAULT_PATH, collection);
-        Calendar endLoad = Calendar.getInstance();
+            storage.flush();
+            storage.loadFromFile(Storage.DEFAULT_PATH, collection);
+            Calendar endLoad = Calendar.getInstance();
 
-        visualize();
+            visualize();
+        }
     }
 
     private void visualize() {
