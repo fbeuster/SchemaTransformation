@@ -52,6 +52,14 @@ public class Storage {
         return nodes.get(nodeId);
     }
 
+    public ArrayList<Edge> getEdges() {
+        return edges;
+    }
+
+    public ArrayList<Node> getNodes() {
+        return nodes;
+    }
+
     public int hasEdge(String name, String parentName, int level) {
         int counter = -1;
 
@@ -80,5 +88,31 @@ public class Storage {
         }
 
         return counter;
+    }
+
+    public void printEdges(long docCount) {
+        for (Edge e : edges) {
+            System.out.println("+++++++ next Edge ++++++++++");
+            System.out.println("Nodename:    " + e.getChildName());
+            System.out.println("Nodelevel:   " + e.getChildLevel());
+            System.out.println("Parentname:  " + e.getParentName());
+            System.out.println("Membercount: " + e.countDocId());
+            float percentages = e.countDocId() / docCount * 100;
+            System.out.println("in percent:  " + percentages + "%");
+            System.out.println();
+        }
+    }
+
+    public void printNodes(long docCount) {
+        for(Node n : nodes) {
+            System.out.println("+++++++ next Node ++++++++++");
+            System.out.println("Nodename:    " + n.getName());
+            System.out.println("Nodelevel:   " + n.getLevel());
+            System.out.println("Datatypes:   " + n.getPropType());
+            System.out.println("Membercount: " + n.countDocId());
+            float percentages = n.countDocId() / docCount * 100;
+            System.out.println("in percent:  " + percentages + "%");
+            System.out.println();
+        }
     }
 }

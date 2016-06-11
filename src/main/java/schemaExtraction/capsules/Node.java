@@ -21,7 +21,7 @@ public class Node implements Serializable {
     /**
      * @return number of documents with this node
      */
-    private int countDocId() {
+    public int countDocId() {
         return this.docId.size();
     }
 

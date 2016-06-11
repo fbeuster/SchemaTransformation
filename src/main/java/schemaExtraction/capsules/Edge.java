@@ -21,7 +21,7 @@ public class Edge implements Serializable {
     /**
      * @return number of documents with this edge
      */
-    public int countDoc_id() {
+    public int countDocId() {
         return this.docId.size();
     }
 

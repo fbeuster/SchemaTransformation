@@ -1,4 +1,4 @@
-group 'thesis_prototyp'
+group 'schemaTransformation'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'com.google.code.gson:gson:2.6.2'
     compile 'org.mongodb:mongodb-driver:3.2.2'
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
