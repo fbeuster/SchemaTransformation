@@ -11,6 +11,8 @@ import java.util.Calendar;
  */
 public class Extraction {
 
+    private long docCount;
+
     private String collection;
     private String database;
 
@@ -28,27 +30,33 @@ public class Extraction {
     public void run() {
         storage = new Storage();
 
+        // mandatory steps
+        extract();
+
+        // optional steps
+        printObjects();
+        visualize();
+        saveAndLoad();
+    }
+
+    private void extract() {
         System.out.println();
         System.out.println("######## Testarea for retrieving a MongoDB collection and iterating through the documents with the extractSchema algorithm ########");
 
         SchemaExtractor se = new SchemaExtractor(this, database, collection);
-        long docCount = se.countDocs();
+        docCount = se.countDocs();
 
         Calendar startExtraction = Calendar.getInstance();
         se.extractAll();
         Calendar endExtraction = Calendar.getInstance();
         se.close();
+    }
 
+    private void printObjects() {
         if (Configuration.PRINT_NODES_EDGES) {
             storage.printNodes(docCount);
             storage.printEdges(docCount);
         }
-
-        Visualizer visualizer = new Visualizer(storage, database);
-        System.out.println(visualizer.toString());
-        System.out.println();
-
-        saveAndLoad();
     }
 
     private void saveAndLoad() {
@@ -64,9 +72,12 @@ public class Extraction {
         storage.loadFromFile(Storage.DEFAULT_PATH, collection);
         Calendar endLoad = Calendar.getInstance();
 
+        visualize();
+    }
+
+    private void visualize() {
         Visualizer visualizer = new Visualizer(storage, database);
         System.out.println(visualizer.toString());
-        System.out.println(storage.countNodes());
-        System.out.println(storage.countEdges());
+        System.out.println();
     }
 }
