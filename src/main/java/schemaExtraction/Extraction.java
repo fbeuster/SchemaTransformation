@@ -10,9 +10,16 @@ import java.util.Calendar;
  * Created by Felix Beuster on 10.06.2016.
  */
 public class Extraction {
+
+    private String collection;
+    private String database;
+
     private Storage storage;
 
-    public Extraction() {}
+    public Extraction(String database, String collection) {
+        this.database = database;
+        this.collection = collection;
+    }
 
     public Storage getStorage() {
         return storage;
@@ -24,7 +31,7 @@ public class Extraction {
         System.out.println();
         System.out.println("######## Testarea for retrieving a MongoDB collection and iterating through the documents with the extractSchema algorithm ########");
 
-        SchemaExtractor se = new SchemaExtractor(this, "test", "thesis_data_user");
+        SchemaExtractor se = new SchemaExtractor(this, database, collection);
         long docCount = se.countDocs();
 
         Calendar startExtraction = Calendar.getInstance();
@@ -37,7 +44,7 @@ public class Extraction {
             storage.printEdges(docCount);
         }
 
-        Visualizer visualizer = new Visualizer(storage, "test");
+        Visualizer visualizer = new Visualizer(storage, database);
         System.out.println(visualizer.toString());
         System.out.println();
     }
