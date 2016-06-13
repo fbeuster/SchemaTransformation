@@ -29,7 +29,7 @@ public class Merger {
             boolean foundMatch = false;
 
             for (Edge b : newEdges) {
-                if (a.getChildName().equalsIgnoreCase(b.getChildName()) &&
+                if (a.getName().equalsIgnoreCase(b.getName()) &&
                         a.getParentName().equalsIgnoreCase(b.getParentName()) &&
                         a.getChildLevel() == b.getChildLevel()) {
                     foundMatch = true;
@@ -52,7 +52,7 @@ public class Merger {
             boolean foundMatch = false;
 
             for (Edge e : mergeEdges) {
-                if(b.getChildName().equalsIgnoreCase(e.getChildName()) &&
+                if(b.getName().equalsIgnoreCase(e.getName()) &&
                         b.getParentName().equalsIgnoreCase(e.getParentName()) &&
                         b.getChildLevel() == e.getChildLevel()) {
                     foundMatch = true;

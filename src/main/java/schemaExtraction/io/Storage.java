@@ -24,7 +24,7 @@ public class Storage {
 
     public void addEdge(String name, String parentName, String docId, int level) {
         Edge edge = new Edge();
-        edge.setChildName(name);
+        edge.setName(name);
         edge.setParentName(parentName);
         edge.setDocId(docId);
         edge.setChildLevel(level);
@@ -73,7 +73,7 @@ public class Storage {
         int counter = 0;
 
         for (Edge it : edges) {
-            if (it.getChildName().equalsIgnoreCase(name)
+            if (it.getName().equalsIgnoreCase(name)
                     && it.getParentName().equalsIgnoreCase(parentName)
                     && it.getChildLevel() == level) {
                 return counter;
@@ -127,7 +127,7 @@ public class Storage {
     public void printEdges(long docCount) {
         for (Edge e : edges) {
             System.out.println("+++++++ next Edge ++++++++++");
-            System.out.println("Nodename:    " + e.getChildName());
+            System.out.println("Nodename:    " + e.getName());
             System.out.println("Nodelevel:   " + e.getChildLevel());
             System.out.println("Parentname:  " + e.getParentName());
             System.out.println("Membercount: " + e.countDocId());
