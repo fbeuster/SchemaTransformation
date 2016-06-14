@@ -12,9 +12,7 @@ import org.bson.types.ObjectId;
 import schemaExtraction.Extraction;
 import schemaExtraction.Configuration;
 
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Jacob Langner
@@ -99,8 +97,27 @@ public class Extractor {
 
             Iterator<JsonElement> iterator = array.iterator();
 
+            ArrayList<ArrayList<String>> arrayOrder = new ArrayList();
+            int typeCount = 0;
+            String currentType = "";
+
             while (iterator.hasNext()) {
                 JsonElement element = iterator.next();
+
+                String elementType = getJsonType(element);
+                if (currentType.equalsIgnoreCase(elementType)) {
+                    typeCount++;
+
+                } else {
+                    if (currentType != "") {
+                        ArrayList<String> order = new ArrayList<>();
+                        order.add(currentType);
+                        order.add(typeCount + "");
+                        arrayOrder.add(order);
+                    }
+                    currentType = elementType;
+                    typeCount = 1;
+                }
 
                 if (element.isJsonObject()) {
                     extractFromJsonDocument(parser.parse(element.toString()), "ArrayObject", nodeName, docId, level + 1);
@@ -115,6 +132,15 @@ public class Extractor {
                 } else {
                     extractFromJsonDocument(parser.parse(element.toString()), "oneOf", nodeName, docId, level + 1);
                 }
+            }
+
+            if (currentType != "") {
+                ArrayList<String> order = new ArrayList<>();
+                order.add(currentType);
+                order.add(typeCount + "");
+                arrayOrder.add(order);
+
+                updateNode(nodeName, arrayOrder, level);
             }
         }
 
@@ -188,6 +214,15 @@ public class Extractor {
 
         } else {
             main.getStorage().addNode(name, propType, docId, level);
+        }
+    }
+
+    private void updateNode(String name, ArrayList<ArrayList<String>> order, int level) {
+        int nodeId =  main.getStorage().hasNode(name, level);
+
+        if (nodeId > -1) {
+            main.getStorage().getNode(nodeId).setArrayOrder(order);
+
         }
     }
 }

@@ -1,6 +1,7 @@
 package schemaExtraction.capsules;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.TreeSet;
 
 /**
@@ -15,6 +16,7 @@ public class Node implements Serializable {
 
     private String name = "";
 
+    private ArrayList<ArrayList<String>> arrayOrder  = new ArrayList<>();
     private TreeSet<String> docId       = new TreeSet<>();
     private TreeSet<String> propType    = new TreeSet<>();
 
@@ -46,6 +48,10 @@ public class Node implements Serializable {
         }
     }
 
+    public ArrayList<ArrayList<String>> getArrayOrder() {
+        return arrayOrder;
+    }
+
     public TreeSet<String> getDocId() {
         return docId;
     }
@@ -64,6 +70,10 @@ public class Node implements Serializable {
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
+    }
+
+    public void setArrayOrder(ArrayList<ArrayList<String>> arrayOrder) {
+        this.arrayOrder = arrayOrder;
     }
 
     public void setDocId(String docId) {

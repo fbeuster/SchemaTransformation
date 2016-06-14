@@ -51,6 +51,9 @@ public class Visualizer {
                 }
 
                 // store description of current node
+                if (n.getArrayOrder().size() > 0) {
+
+                }
                 int nodeOcc     = n.countDocId();
                 float occRel    = nodeOcc * 100 / parentOcc;
                 String desc     = "Occurence: " + nodeOcc + "/" + parentOcc + ", " + occRel + "%";

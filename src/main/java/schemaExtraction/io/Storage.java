@@ -146,6 +146,15 @@ public class Storage {
             System.out.println("Membercount: " + n.countDocId());
             float percentages = n.countDocId() / docCount * 100;
             System.out.println("in percent:  " + percentages + "%");
+            if (n.getArrayOrder().size() > 0) {
+                System.out.println("array order: ");
+                for (int i = 0; i < n.getArrayOrder().size(); i++) {
+                    ArrayList<String> e = n.getArrayOrder().get(i);
+                    String count = e.get(1);
+                    String type = e.get(0);
+                    System.out.println("    Pos. " + i + ", Type: " + type + ", Count: " + count);
+                }
+            }
             System.out.println();
         }
     }
