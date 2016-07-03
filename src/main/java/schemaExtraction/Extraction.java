@@ -29,6 +29,11 @@ public class Extraction {
         return storage;
     }
 
+    public String getJsonSchema() {
+        Visualizer visualizer = new Visualizer(storage, database);
+        return visualizer.toString();
+    }
+
     public void run() {
         storage = new Storage();
 
@@ -99,8 +104,10 @@ public class Extraction {
     }
 
     private void visualize() {
-        Visualizer visualizer = new Visualizer(storage, database);
-        System.out.println(visualizer.toString());
-        System.out.println();
+        if (Configuration.PRINT_JSON_SCHEMA) {
+            Visualizer visualizer = new Visualizer(storage, database);
+            System.out.println(visualizer.toString());
+            System.out.println();
+        }
     }
 }
