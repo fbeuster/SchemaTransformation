@@ -70,7 +70,7 @@ public class Extractor {
             }
 
             // extraction method call for document schema extraction
-            extractFromJsonDocument(parser.parse(doc.toJson()), collection, "", docId, 0);
+            extractFromJsonDocument(parser.parse(doc.toJson()), collection, "", docId, 0, "");
         }
     }
 
@@ -78,18 +78,20 @@ public class Extractor {
         return docs.count();
     }
 
-    private void extractFromJsonDocument(JsonElement node, String nodeName, String parentName, String docId, int level) {
+    private void extractFromJsonDocument(JsonElement node, String nodeName, String parentName, String docId, int level, String path) {
         String propType = getJsonType(node);
 
-        storeNode(nodeName, propType, docId, level);
+        storeNode(nodeName, propType, docId, level, path + "/" + nodeName);
 
         if (parentName != "" && parentName != collection) {
-            storeEdge(nodeName, parentName, docId, level);
+            storeEdge(nodeName, parentName, docId, level, path + "/" + nodeName, path);
         }
+
+        path = path + "/" + nodeName;
 
         if (node.isJsonObject()) {
             for (Map.Entry<String, JsonElement> it : node.getAsJsonObject().entrySet()) {
-                extractFromJsonDocument(parser.parse(it.getValue().toString()), it.getKey(), nodeName, docId, level + 1);
+                extractFromJsonDocument(parser.parse(it.getValue().toString()), it.getKey(), nodeName, docId, level + 1, path);
             }
 
         } else if (node.isJsonArray()) {
@@ -120,17 +122,17 @@ public class Extractor {
                 }
 
                 if (element.isJsonObject()) {
-                    extractFromJsonDocument(parser.parse(element.toString()), "ArrayObject", nodeName, docId, level + 1);
+                    extractFromJsonDocument(parser.parse(element.toString()), "ArrayObject", nodeName, docId, level + 1, path);
 
                 } else if (element.isJsonArray()) {
                     Iterator<JsonElement> nestedIterator = element.getAsJsonArray().iterator();
 
                     while (nestedIterator.hasNext()) {
-                        extractFromJsonDocument(parser.parse(nestedIterator.next().toString()), "anyOf", nodeName, docId, level + 1);
+                        extractFromJsonDocument(parser.parse(nestedIterator.next().toString()), "anyOf", nodeName, docId, level + 1, path);
                     }
 
                 } else {
-                    extractFromJsonDocument(parser.parse(element.toString()), "oneOf", nodeName, docId, level + 1);
+                    extractFromJsonDocument(parser.parse(element.toString()), "oneOf", nodeName, docId, level + 1, path);
                 }
             }
 
@@ -140,7 +142,7 @@ public class Extractor {
                 order.add(typeCount + "");
                 arrayOrder.add(order);
 
-                updateNode(nodeName, arrayOrder, level);
+                updateNode(nodeName, arrayOrder, level, path);
             }
         }
 
@@ -194,31 +196,31 @@ public class Extractor {
         }
     }
 
-    private void storeEdge(String name, String parentName, String docId, int level) {
-        int edgeId = main.getStorage().hasEdge(name, parentName, level);
+    private void storeEdge(String name, String parentName, String docId, int level, String childPath, String parentPath) {
+        int edgeId = main.getStorage().hasEdge(childPath, parentPath);
 
         if (edgeId > -1) {
             main.getStorage().getEdge(edgeId).setDocId(docId);
 
         } else {
-            main.getStorage().addEdge(name, parentName, docId, level);
+            main.getStorage().addEdge(name, parentName, docId, level, childPath, parentPath);
         }
     }
 
-    private void storeNode(String name, String propType, String docId, int level) {
-        int nodeId =  main.getStorage().hasNode(name, level);
+    private void storeNode(String name, String propType, String docId, int level, String path) {
+        int nodeId =  main.getStorage().hasNode(path);
 
         if (nodeId > -1) {
             main.getStorage().getNode(nodeId).setPropType(propType);
             main.getStorage().getNode(nodeId).setDocId(docId);
 
         } else {
-            main.getStorage().addNode(name, propType, docId, level);
+            main.getStorage().addNode(name, propType, docId, level, path);
         }
     }
 
-    private void updateNode(String name, ArrayList<ArrayList<String>> order, int level) {
-        int nodeId =  main.getStorage().hasNode(name, level);
+    private void updateNode(String name, ArrayList<ArrayList<String>> order, int level, String path) {
+        int nodeId =  main.getStorage().hasNode(path);
 
         if (nodeId > -1) {
             main.getStorage().getNode(nodeId).setArrayOrder(order);

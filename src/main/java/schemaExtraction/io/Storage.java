@@ -22,21 +22,24 @@ public class Storage {
         nodes = new ArrayList<>();
     }
 
-    public void addEdge(String name, String parentName, String docId, int level) {
+    public void addEdge(String childName, String parentName, String docId, int level, String childPath, String parentPath) {
         Edge edge = new Edge();
-        edge.setName(name);
+        edge.setChildName(childName);
         edge.setParentName(parentName);
+        edge.setChildPath(childPath);
+        edge.setParentPath(parentPath);
         edge.setDocId(docId);
         edge.setChildLevel(level);
         edges.add(edge);
     }
 
-    public void addNode(String name, String propType, String docId, int level) {
+    public void addNode(String name, String propType, String docId, int level, String path) {
         Node node = new Node();
         node.setName(name);
         node.setPropType(propType);
         node.setDocId(docId);
         node.setLevel(level);
+        node.setPath(path);
         nodes.add(node);
     }
 
@@ -69,13 +72,12 @@ public class Storage {
         return nodes;
     }
 
-    public int hasEdge(String name, String parentName, int level) {
+    public int hasEdge(String childPath, String parentPath) {
         int counter = 0;
 
         for (Edge it : edges) {
-            if (it.getName().equalsIgnoreCase(name)
-                    && it.getParentName().equalsIgnoreCase(parentName)
-                    && it.getChildLevel() == level) {
+            if (it.getChildPath().equalsIgnoreCase(childPath)
+                    && it.getParentPath().equalsIgnoreCase(parentPath)) {
                 return counter;
             }
             counter++;
@@ -84,11 +86,11 @@ public class Storage {
         return -1;
     }
 
-    public int hasNode(String name, int level) {
+    public int hasNode(String path) {
         int counter = 0;
 
         for (Node it : nodes) {
-            if (it.getName().equalsIgnoreCase(name) && it.getLevel() == level) {
+            if (it.getPath().equalsIgnoreCase(path)) {
                 return counter;
             }
             counter++;
@@ -127,9 +129,11 @@ public class Storage {
     public void printEdges(long docCount) {
         for (Edge e : edges) {
             System.out.println("+++++++ next Edge ++++++++++");
-            System.out.println("Nodename:    " + e.getName());
-            System.out.println("Nodelevel:   " + e.getChildLevel());
+            System.out.println("Childname:   " + e.getChildName());
+            System.out.println("Childlevel:  " + e.getChildLevel());
+            System.out.println("Childpath:   " + e.getChildPath());
             System.out.println("Parentname:  " + e.getParentName());
+            System.out.println("Parentpath:  " + e.getParentPath());
             System.out.println("Membercount: " + e.countDocId());
             float percentages = e.countDocId() / docCount * 100;
             System.out.println("in percent:  " + percentages + "%");
@@ -142,6 +146,7 @@ public class Storage {
             System.out.println("+++++++ next Node ++++++++++");
             System.out.println("Nodename:    " + n.getName());
             System.out.println("Nodelevel:   " + n.getLevel());
+            System.out.println("Nodepath:   " + n.getPath());
             System.out.println("Datatypes:   " + n.getPropType());
             System.out.println("Membercount: " + n.countDocId());
             float percentages = n.countDocId() / docCount * 100;

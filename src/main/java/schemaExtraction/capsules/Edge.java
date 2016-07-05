@@ -13,8 +13,10 @@ public class Edge implements Serializable {
 
     private static final long serialVersionUID = -8196526770077719084L;
 
-    private String name = "";
-    private String parentName   = "";
+    private String childName = "";
+    private String childPath = "";
+    private String parentName = "";
+    private String parentPath = "";
 
     private TreeSet<String> docId = new TreeSet<>();
 
@@ -50,8 +52,12 @@ public class Edge implements Serializable {
         return childLevel;
     }
 
-    public String getName() {
-        return name;
+    public String getChildName() {
+        return childName;
+    }
+
+    public String getChildPath() {
+        return childPath;
     }
 
     public TreeSet<String> getDocId() {
@@ -62,12 +68,20 @@ public class Edge implements Serializable {
         return parentName;
     }
 
+    public String getParentPath() {
+        return parentPath;
+    }
+
     public void setChildLevel(int childLevel) {
         this.childLevel = childLevel;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setChildName(String childName) {
+        this.childName = childName;
+    }
+
+    public void setChildPath(String childPath) {
+        this.childPath = childPath;
     }
 
     public void setDocId(String docId) {
@@ -76,5 +90,9 @@ public class Edge implements Serializable {
 
     public void setParentName(String parentName) {
         this.parentName = parentName;
+    }
+
+    public void setParentPath(String parentPath) {
+        this.parentPath = parentPath;
     }
 }

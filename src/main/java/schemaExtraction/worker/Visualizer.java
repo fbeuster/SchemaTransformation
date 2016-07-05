@@ -74,10 +74,10 @@ public class Visualizer {
                         JsonArray requiredProperties    = new JsonArray();
 
                         for (Edge e : outgoingEdges) {
-                            properties.append(e.getName(), elementToDocument(e.getName(), nodeOcc, e.getChildLevel()));
+                            properties.append(e.getChildName(), elementToDocument(e.getChildName(), nodeOcc, e.getChildLevel()));
 
                             if (e.countDocId() == nodeOcc) {
-                                requiredProperties.add(e.getName());
+                                requiredProperties.add(e.getChildName());
                             }
                         }
 
@@ -100,13 +100,13 @@ public class Visualizer {
                     }
 
                     if (outgoingEdges.size() == 1) {
-                        schema.append("items", elementToDocument(outgoingEdges.get(0).getName(), nodeOcc, outgoingEdges.get(0).getChildLevel()));
+                        schema.append("items", elementToDocument(outgoingEdges.get(0).getChildName(), nodeOcc, outgoingEdges.get(0).getChildLevel()));
 
                     } else if (outgoingEdges.size() > 1) {
                         Document items = new Document();
 
                         for (Edge e : outgoingEdges) {
-                            items.append(e.getName(), elementToDocument(e.getName(), nodeOcc, e.getChildLevel()));
+                            items.append(e.getChildName(), elementToDocument(e.getChildName(), nodeOcc, e.getChildLevel()));
                         }
 
                         schema.append("items", items);

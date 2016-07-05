@@ -29,9 +29,8 @@ public class Merger {
             boolean foundMatch = false;
 
             for (Edge b : newEdges) {
-                if (a.getName().equalsIgnoreCase(b.getName()) &&
-                        a.getParentName().equalsIgnoreCase(b.getParentName()) &&
-                        a.getChildLevel() == b.getChildLevel()) {
+                if (a.getChildPath().equalsIgnoreCase(b.getChildPath())
+                        && a.getParentPath().equalsIgnoreCase(b.getParentPath())) {
                     foundMatch = true;
 
                     for (String docId : a.getDocId()) {
@@ -52,9 +51,8 @@ public class Merger {
             boolean foundMatch = false;
 
             for (Edge e : mergeEdges) {
-                if(b.getName().equalsIgnoreCase(e.getName()) &&
-                        b.getParentName().equalsIgnoreCase(e.getParentName()) &&
-                        b.getChildLevel() == e.getChildLevel()) {
+                if (b.getChildPath().equalsIgnoreCase(e.getChildPath())
+                        && b.getParentPath().equalsIgnoreCase(e.getParentPath())) {
                     foundMatch = true;
                     break;
                 }
@@ -71,7 +69,7 @@ public class Merger {
             boolean foundMatch = false;
 
             for (Node b : newNodes) {
-                if ((a.getName().equalsIgnoreCase(b.getName()) && a.getLevel() == b.getLevel()) ||
+                if ((a.getPath().equalsIgnoreCase(b.getPath())) ||
                         (a.getLevel() == 0 && b.getLevel() == 0)) {
                     foundMatch = true;
 
@@ -101,7 +99,7 @@ public class Merger {
             boolean foundMatch = false;
 
             for (Node n : mergeNodes) {
-                if (b.getName().equalsIgnoreCase(n.getName()) && b.getLevel() == n.getLevel()) {
+                if (b.getPath().equalsIgnoreCase(n.getPath())) {
                     foundMatch = true;
                     break;
                 }

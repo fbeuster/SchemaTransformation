@@ -15,6 +15,7 @@ public class Node implements Serializable {
     private static final long serialVersionUID = -4118580040968696269L;
 
     private String name = "";
+    private String path = "";
 
     private ArrayList<ArrayList<String>> arrayOrder  = new ArrayList<>();
     private TreeSet<String> docId       = new TreeSet<>();
@@ -64,6 +65,8 @@ public class Node implements Serializable {
         return name;
     }
 
+    public String getPath() { return path; }
+
     public TreeSet<String> getPropType() {
         return propType;
     }
@@ -89,6 +92,8 @@ public class Node implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void setPath(String path) { this.path = path; }
 
     public void setPropType(String propType) {
         if (this.propType.contains(propType) == false) {
