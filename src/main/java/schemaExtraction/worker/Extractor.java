@@ -122,7 +122,7 @@ public class Extractor {
                 }
 
                 if (element.isJsonObject()) {
-                    extractFromJsonDocument(parser.parse(element.toString()), "ArrayObject", nodeName, docId, level + 1, path);
+                    extractFromJsonDocument(parser.parse(element.toString()), "anyOf", nodeName, docId, level + 1, path);
 
                 } else if (element.isJsonArray()) {
                     Iterator<JsonElement> nestedIterator = element.getAsJsonArray().iterator();
@@ -132,7 +132,7 @@ public class Extractor {
                     }
 
                 } else {
-                    extractFromJsonDocument(parser.parse(element.toString()), "oneOf", nodeName, docId, level + 1, path);
+                    extractFromJsonDocument(parser.parse(element.toString()), "anyOf", nodeName, docId, level + 1, path);
                 }
             }
 

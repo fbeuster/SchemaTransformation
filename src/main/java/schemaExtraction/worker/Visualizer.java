@@ -33,12 +33,81 @@ public class Visualizer {
         objectsToDcoument();
     }
 
-    private Document elementToDocument(String nodeName, int parentOcc, int nodeLevel) {
+    private Document typesToDoument(Node n, int parentOcc, int nodeLevel, String nodePath, TreeSet<String> propType) {
+        Document schema = new Document();
+
+        // store description of current node
+        if (n.getArrayOrder().size() > 0) {
+
+        }
+        int nodeOcc     = n.countDocId();
+        float occRel    = nodeOcc * 100 / parentOcc;
+        String desc     = "Occurence: " + nodeOcc + "/" + parentOcc + ", " + occRel + "%";
+        schema.append("description", desc);
+
+        // node contains JsonObject
+        if (propType.contains("JsonObject") || propType.contains("class com.google.gson.JsonObject")) {
+            List<Edge> outgoingEdges = new ArrayList<>();
+
+            for (Edge e : storage.getEdges()) {
+                if (e.getParentPath().equalsIgnoreCase(nodePath) && e.getChildLevel() == nodeLevel + 1) {
+                    outgoingEdges.add(e);
+                }
+            }
+
+            if (outgoingEdges.size() > 0) {
+                Document properties             = new Document();
+                JsonArray requiredProperties    = new JsonArray();
+
+                for (Edge e : outgoingEdges) {
+                    properties.append(e.getChildName(), elementToDocument(e.getChildName(), nodeOcc, e.getChildLevel(), e.getChildPath()));
+
+                    if (e.countDocId() == nodeOcc) {
+                        requiredProperties.add(e.getChildName());
+                    }
+                }
+
+                schema.append("properties", properties);
+
+                if (requiredProperties.size() > 0) {
+                    schema.append("required properties", requiredProperties);
+                }
+            }
+        }
+
+        // node contains array
+        if (propType.contains("JsonArray") || propType.contains("class com.google.gson.JsonArray")) {
+            List<Edge> outgoingEdges = new ArrayList<>();
+
+            for (Edge e : storage.getEdges()) {
+                if (e.getParentPath().equalsIgnoreCase(nodePath) && e.getChildLevel() == nodeLevel + 1) {
+                    outgoingEdges.add(e);
+                }
+            }
+
+            if (outgoingEdges.size() == 1) {
+
+                schema.append("items", elementToDocument(outgoingEdges.get(0).getChildName(), nodeOcc, outgoingEdges.get(0).getChildLevel(), outgoingEdges.get(0).getChildPath()));
+
+            } else if (outgoingEdges.size() > 1) {
+                Document items = new Document();
+
+                for (Edge e : outgoingEdges) {
+                    items.append(e.getChildName(), elementToDocument(e.getChildName(), nodeOcc, e.getChildLevel(), e.getChildPath()));
+                }
+
+                schema.append("items", items);
+            }
+        }
+        return schema;
+    }
+
+    private Document elementToDocument(String nodeName, int parentOcc, int nodeLevel, String nodePath) {
         Document schema = new Document();
 
         // find current node in nodes
         for (Node n : storage.getNodes()) {
-            if (n.getName().equalsIgnoreCase(nodeName) && n.getLevel() == nodeLevel) {
+            if (n.getPath().equalsIgnoreCase(nodePath)) {
 
                 // store data type of current node
                 TreeSet<String> propType = n.getPropType();
@@ -46,71 +115,30 @@ public class Visualizer {
                 if (propType.size() == 1) {
                     schema.append("type", propType.first());
 
+                    Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, propType);
+                    for (String key : subSchema.keySet()) {
+                        schema.append(key, subSchema.get(key));
+                    }
+
                 } else {
-                    schema.append("type", propType.toArray());
-                }
+                    ArrayList<Document> types = new ArrayList<>();
 
-                // store description of current node
-                if (n.getArrayOrder().size() > 0) {
+                    for (String type : propType) {
+                        Document typeSchema = new Document();
+                        typeSchema.append("type", type);
 
-                }
-                int nodeOcc     = n.countDocId();
-                float occRel    = nodeOcc * 100 / parentOcc;
-                String desc     = "Occurence: " + nodeOcc + "/" + parentOcc + ", " + occRel + "%";
-                schema.append("description", desc);
+                        TreeSet<String> typeTree = new TreeSet<>();
+                        typeTree.add(type);
 
-                // node contains JsonObject
-                if (propType.contains("JsonObject") || propType.contains("class com.google.gson.JsonObject")) {
-                    List<Edge> outgoingEdges = new ArrayList<>();
-
-                    for (Edge e : storage.getEdges()) {
-                        if (e.getParentName().equalsIgnoreCase(nodeName) && e.getChildLevel() == nodeLevel + 1) {
-                            outgoingEdges.add(e);
+                        Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, typeTree);
+                        for (String key : subSchema.keySet()) {
+                            typeSchema.append(key, subSchema.get(key));
                         }
+
+                        types.add(typeSchema);
                     }
 
-                    if (outgoingEdges.size() > 0) {
-                        Document properties             = new Document();
-                        JsonArray requiredProperties    = new JsonArray();
-
-                        for (Edge e : outgoingEdges) {
-                            properties.append(e.getChildName(), elementToDocument(e.getChildName(), nodeOcc, e.getChildLevel()));
-
-                            if (e.countDocId() == nodeOcc) {
-                                requiredProperties.add(e.getChildName());
-                            }
-                        }
-
-                        schema.append("properties", properties);
-
-                        if (requiredProperties.size() > 0) {
-                            schema.append("required properties", requiredProperties);
-                        }
-                    }
-                }
-
-                // node contains array
-                if (propType.contains("JsonArray") || propType.contains("class com.google.gson.JsonArray")) {
-                    List<Edge> outgoingEdges = new ArrayList<>();
-
-                    for (Edge e : storage.getEdges()) {
-                        if (e.getParentName().equalsIgnoreCase(nodeName) && e.getChildLevel() == nodeLevel + 1) {
-                            outgoingEdges.add(e);
-                        }
-                    }
-
-                    if (outgoingEdges.size() == 1) {
-                        schema.append("items", elementToDocument(outgoingEdges.get(0).getChildName(), nodeOcc, outgoingEdges.get(0).getChildLevel()));
-
-                    } else if (outgoingEdges.size() > 1) {
-                        Document items = new Document();
-
-                        for (Edge e : outgoingEdges) {
-                            items.append(e.getChildName(), elementToDocument(e.getChildName(), nodeOcc, e.getChildLevel()));
-                        }
-
-                        schema.append("items", items);
-                    }
+                    schema.append(nodeName, types.toArray());
                 }
 
                 // break find current node
@@ -151,14 +179,14 @@ public class Visualizer {
 
         for (Edge e : storage.getEdges()) {
             if (e.getChildLevel() == 2) {
-                properties.append(e.getParentName(), elementToDocument(e.getParentName(), docCount, 1));
+                properties.append(e.getParentName(), elementToDocument(e.getParentName(), docCount, 1, e.getParentPath()));
             }
         }
 
         for (Node n : storage.getNodes()) {
             if (n.getLevel() == 1) {
                 if (!properties.containsKey(n.getName())) {
-                    properties.append(n.getName(), elementToDocument(n.getName(), docCount, 1));
+                    properties.append(n.getName(), elementToDocument(n.getName(), docCount, 1, n.getPath()));
                 }
 
                 if (n.countDocId() == docCount) {
