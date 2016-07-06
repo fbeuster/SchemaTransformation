@@ -138,7 +138,7 @@ public class Visualizer {
                         types.add(typeSchema);
                     }
 
-                    schema.append(nodeName, types.toArray());
+                    schema.append("anyOf", types.toArray());
                 }
 
                 // break find current node
