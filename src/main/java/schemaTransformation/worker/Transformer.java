@@ -35,6 +35,7 @@ public class Transformer {
     }
 
     private void makeRelation(String name, JsonObject object) {
+//        System.out.println(object);
         Relation relation = new Relation(name);
         relation.addAttribtue(new Attribute("ID", TypeMapper.TYPE_ID));
 
@@ -42,25 +43,36 @@ public class Transformer {
             String attributeName = entry.getKey();
             JsonObject property = entry.getValue().getAsJsonObject();
 
-            if ( TypeMapper.jsonToInt(property.get("type")) == TypeMapper.TYPE_OBJECT ) {
-                attributeName += "ID";
-                makeRelation(entry.getKey(), property.getAsJsonObject("properties"));
+            if (property.get("anyOf") != null) {
+                System.out.println("TODO mixed types");
 
-            } else if ( TypeMapper.jsonToInt(property.get("type")) == TypeMapper.TYPE_ARRAY ) {
-                attributeName += "ID";
+            } else {
+                if (TypeMapper.jsonToInt(property.get("type")) == TypeMapper.TYPE_OBJECT) {
+                    attributeName += "ID";
+                    makeRelation(entry.getKey(), property.getAsJsonObject("properties"));
 
-                if ( TypeMapper.jsonToInt(property.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_OBJECT) {
-                    makeRelation(entry.getKey(), property.getAsJsonObject("items").getAsJsonObject("properties"));
+                } else if (TypeMapper.jsonToInt(property.get("type")) == TypeMapper.TYPE_ARRAY) {
+                    attributeName += "ID";
 
-                } else if( TypeMapper.jsonToInt(property.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_ARRAY) {
 
-                } else {
-                    makePrimitiveRelation(entry.getKey(), property.getAsJsonObject("items").get("type"));
+                    if (property.getAsJsonObject("items").get("anyOf") != null) {
+                        System.out.println("TODO mixed array");
+
+                    } else {
+                        if (TypeMapper.jsonToInt(property.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_OBJECT) {
+                            makeRelation(entry.getKey(), property.getAsJsonObject("items").getAsJsonObject("properties"));
+
+                        } else if (TypeMapper.jsonToInt(property.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_ARRAY) {
+
+                        } else {
+                            makePrimitiveRelation(entry.getKey(), property.getAsJsonObject("items").get("type"));
+                        }
+                    }
                 }
-            }
 
-            Attribute attribute = new Attribute(attributeName, TypeMapper.jsonToInt(property.get("type")));
-            relation.addAttribtue(attribute);
+                Attribute attribute = new Attribute(attributeName, TypeMapper.jsonToInt(property.get("type")));
+                relation.addAttribtue(attribute);
+            }
         }
 
         relations.add(relation);
