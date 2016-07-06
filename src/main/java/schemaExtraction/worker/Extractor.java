@@ -74,6 +74,17 @@ public class Extractor {
         }
     }
 
+    public void extractTest(String element) {
+        cycles = 0;
+        startTime = Calendar.getInstance();
+
+        // begin iteration
+        System.out.println("test extraction");
+
+        String docId = new ObjectId().toString();
+        extractFromJsonDocument(parser.parse(element), collection, "", docId, 0, "");
+    }
+
     public long countDocs() {
         return docs.count();
     }
@@ -125,11 +136,8 @@ public class Extractor {
                     extractFromJsonDocument(parser.parse(element.toString()), "anyOf", nodeName, docId, level + 1, path);
 
                 } else if (element.isJsonArray()) {
-                    Iterator<JsonElement> nestedIterator = element.getAsJsonArray().iterator();
 
-                    while (nestedIterator.hasNext()) {
-                        extractFromJsonDocument(parser.parse(nestedIterator.next().toString()), "anyOf", nodeName, docId, level + 1, path);
-                    }
+                    extractFromJsonDocument(parser.parse(element.toString()), "anyOf", nodeName, docId, level + 1, path);
 
                 } else {
                     extractFromJsonDocument(parser.parse(element.toString()), "anyOf", nodeName, docId, level + 1, path);
@@ -141,9 +149,10 @@ public class Extractor {
                 order.add(currentType);
                 order.add(typeCount + "");
                 arrayOrder.add(order);
-
-                updateNode(nodeName, arrayOrder, level, path);
             }
+
+            updateNode(nodeName, arrayOrder, level, path);
+
         }
 
         if (Configuration.PRINT_CYCLE_NUMBER) {
