@@ -33,7 +33,7 @@ public class Visualizer {
         objectsToDcoument();
     }
 
-    private Document typesToDoument(Node n, int parentOcc, int nodeLevel, String nodePath, TreeSet<String> propType) {
+    private Document typesToDoument(Node n, int parentOcc, int nodeLevel, String nodePath, TreeSet<String> propType, String nodeName) {
         Document schema = new Document();
 
         // store description of current node
@@ -50,7 +50,7 @@ public class Visualizer {
             List<Edge> outgoingEdges = new ArrayList<>();
 
             for (Edge e : storage.getEdges()) {
-                if (e.getParentPath().equalsIgnoreCase(nodePath) && e.getChildLevel() == nodeLevel + 1) {
+                if (e.getParentPath().equalsIgnoreCase(nodePath) && e.getChildLevel() == nodeLevel + 1 && !e.getChildName().equals("anyOf")) {
                     outgoingEdges.add(e);
                 }
             }
@@ -80,7 +80,7 @@ public class Visualizer {
             List<Edge> outgoingEdges = new ArrayList<>();
 
             for (Edge e : storage.getEdges()) {
-                if (e.getParentPath().equalsIgnoreCase(nodePath) && e.getChildLevel() == nodeLevel + 1) {
+                if (e.getParentPath().equalsIgnoreCase(nodePath) && e.getChildLevel() == nodeLevel + 1 && e.getChildName().equals("anyOf")) {
                     outgoingEdges.add(e);
                 }
             }
@@ -115,7 +115,7 @@ public class Visualizer {
                 if (propType.size() == 1) {
                     schema.append("type", propType.first());
 
-                    Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, propType);
+                    Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, propType, nodeName);
                     for (String key : subSchema.keySet()) {
                         schema.append(key, subSchema.get(key));
                     }
@@ -130,7 +130,7 @@ public class Visualizer {
                         TreeSet<String> typeTree = new TreeSet<>();
                         typeTree.add(type);
 
-                        Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, typeTree);
+                        Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, typeTree, nodeName);
                         for (String key : subSchema.keySet()) {
                             typeSchema.append(key, subSchema.get(key));
                         }
