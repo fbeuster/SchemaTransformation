@@ -35,7 +35,6 @@ public class Transformer {
     }
 
     private void makeRelation(String name, JsonObject object) {
-//        System.out.println(object);
         Relation relation = new Relation(name);
         relation.addAttribtue(new Attribute("ID", TypeMapper.TYPE_ID));
 
@@ -44,7 +43,9 @@ public class Transformer {
             JsonObject property = entry.getValue().getAsJsonObject();
 
             if (property.get("anyOf") != null) {
-                System.out.println("TODO mixed types");
+                /** TODO
+                 *  mixed types for a property
+                 */
 
             } else {
                 if (TypeMapper.jsonToInt(property.get("type")) == TypeMapper.TYPE_OBJECT) {
@@ -56,13 +57,21 @@ public class Transformer {
 
 
                     if (property.getAsJsonObject("items").get("anyOf") != null) {
-                        System.out.println("TODO mixed array");
+                        /** TODO
+                         *  mixed arrays
+                         */
 
                     } else {
+                        /** TODO
+                         *  - new relation (inner) ID and order field
+                         *  - relation calling the array (outer) has inner.ID has field
+                         *  - valid for all array types
+                         */
                         if (TypeMapper.jsonToInt(property.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_OBJECT) {
                             makeRelation(entry.getKey(), property.getAsJsonObject("items").getAsJsonObject("properties"));
 
                         } else if (TypeMapper.jsonToInt(property.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_ARRAY) {
+                            System.out.println("TODO nested arrays");
 
                         } else {
                             makePrimitiveRelation(entry.getKey(), property.getAsJsonObject("items").get("type"));
