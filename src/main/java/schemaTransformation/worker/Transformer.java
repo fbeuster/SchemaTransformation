@@ -1,5 +1,6 @@
 package schemaTransformation.worker;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import schemaTransformation.capsules.Attribute;
@@ -28,9 +29,32 @@ public class Transformer {
 
     private void handleArrayRelations(String name, JsonObject object) {
         if (object.getAsJsonObject("items").get("anyOf") != null) {
-            /** TODO
-             *  mixed arrays
-             */
+
+            Relation relation = new Relation(name);
+            relation.addAttribtue(new Attribute("ID", TypeMapper.TYPE_ID));
+            relation.addAttribtue(new Attribute("order", TypeMapper.TYPE_ORDER));
+
+            JsonArray types = object.getAsJsonObject("items").getAsJsonArray("anyOf");
+
+            for(JsonElement element : types) {
+                JsonObject type = element.getAsJsonObject();
+
+                int attributeType       = TypeMapper.jsonToInt(type.get("type"));
+                String attributeName    = "value_" + TypeMapper.jsonToString(type.get("type"));
+
+                if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_OBJECT) {
+                    makeRelation( name + "Object", type.getAsJsonObject("properties"));
+
+                } else if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_ARRAY) {
+                    handleArrayRelations( name + "Array", type );
+
+                } else {
+                }
+
+                relation.addAttribtue( new Attribute( attributeName, attributeType ) );
+            }
+
+            relations.add(relation);
 
         } else {
             if (TypeMapper.jsonToInt(object.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_OBJECT) {
@@ -90,6 +114,7 @@ public class Transformer {
                 /** TODO
                  *  mixed types for a property
                  */
+            System.out.println("TODO mixed types for a property");
 
             } else {
                 if (TypeMapper.jsonToInt(property.get("type")) == TypeMapper.TYPE_OBJECT) {
