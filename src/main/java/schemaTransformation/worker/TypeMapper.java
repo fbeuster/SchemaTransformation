@@ -13,7 +13,8 @@ public class TypeMapper {
     public static int TYPE_NULL     = 3;
     public static int TYPE_NUMBER   = 4;
     public static int TYPE_OBJECT   = 5;
-    public static int TYPE_STRING   = 6;
+    public static int TYPE_ORDER    = 6;
+    public static int TYPE_STRING   = 7;
 
     public static int jsonToInt(JsonElement element) {
         String elementString = element.toString();

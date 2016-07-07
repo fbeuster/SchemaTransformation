@@ -26,17 +26,61 @@ public class Transformer {
         relations = new ArrayList<>();
     }
 
+    private void handleArrayRelations(String name, JsonObject object) {
+        if (object.getAsJsonObject("items").get("anyOf") != null) {
+            /** TODO
+             *  mixed arrays
+             */
+
+        } else {
+            if (TypeMapper.jsonToInt(object.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_OBJECT) {
+                ArrayList<Attribute> e = new ArrayList<>();
+                e.add(new Attribute("order", TypeMapper.TYPE_ORDER));
+
+                makeRelation(   name + "Array",
+                        object.getAsJsonObject("items").getAsJsonObject("properties"),
+                        e);
+
+            } else if (TypeMapper.jsonToInt(object.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_ARRAY) {
+                makeArrayRelation( name + "Array", object.getAsJsonObject("items") );
+
+            } else {
+                makePrimitiveRelation(name + "Array", object.getAsJsonObject("items").get("type"));
+            }
+        }
+    }
+
+    private void makeArrayRelation(String name, JsonObject object) {
+        Relation relation = new Relation(name);
+        relation.addAttribtue(new Attribute("ID", TypeMapper.TYPE_ID));
+        relation.addAttribtue(new Attribute("order", TypeMapper.TYPE_ORDER));
+        relation.addAttribtue(new Attribute(name + "ArrayID", TypeMapper.TYPE_ID));
+
+        handleArrayRelations(name, object);
+
+        relations.add(relation);
+    }
+
     private void makePrimitiveRelation(String name, JsonElement element) {
         Relation relation = new Relation(name);
         relation.addAttribtue(new Attribute("ID", TypeMapper.TYPE_ID));
+        relation.addAttribtue(new Attribute("order", TypeMapper.TYPE_ORDER));
         relation.addAttribtue(new Attribute("value", TypeMapper.jsonToInt(element)));
 
         relations.add(relation);
     }
 
     private void makeRelation(String name, JsonObject object) {
+        makeRelation(name, object, new ArrayList<>());
+    }
+
+    private void makeRelation(String name, JsonObject object, ArrayList<Attribute> extra) {
         Relation relation = new Relation(name);
         relation.addAttribtue(new Attribute("ID", TypeMapper.TYPE_ID));
+
+        for (Attribute a : extra) {
+            relation.addAttribtue(a);
+        }
 
         for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
             String attributeName = entry.getKey();
@@ -54,29 +98,7 @@ public class Transformer {
 
                 } else if (TypeMapper.jsonToInt(property.get("type")) == TypeMapper.TYPE_ARRAY) {
                     attributeName += "ID";
-
-
-                    if (property.getAsJsonObject("items").get("anyOf") != null) {
-                        /** TODO
-                         *  mixed arrays
-                         */
-
-                    } else {
-                        /** TODO
-                         *  - new relation (inner) ID and order field
-                         *  - relation calling the array (outer) has inner.ID has field
-                         *  - valid for all array types
-                         */
-                        if (TypeMapper.jsonToInt(property.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_OBJECT) {
-                            makeRelation(entry.getKey(), property.getAsJsonObject("items").getAsJsonObject("properties"));
-
-                        } else if (TypeMapper.jsonToInt(property.getAsJsonObject("items").get("type")) == TypeMapper.TYPE_ARRAY) {
-                            System.out.println("TODO nested arrays");
-
-                        } else {
-                            makePrimitiveRelation(entry.getKey(), property.getAsJsonObject("items").get("type"));
-                        }
-                    }
+                    handleArrayRelations(entry.getKey(), property);
                 }
 
                 Attribute attribute = new Attribute(attributeName, TypeMapper.jsonToInt(property.get("type")));
