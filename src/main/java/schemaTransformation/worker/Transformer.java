@@ -35,7 +35,6 @@ public class Transformer {
             relation.addAttribtue(new Attribute("order", TypeMapper.TYPE_ORDER));
 
             JsonArray types = object.getAsJsonObject("items").getAsJsonArray("anyOf");
-
             for(JsonElement element : types) {
                 JsonObject type = element.getAsJsonObject();
 
@@ -111,10 +110,25 @@ public class Transformer {
             JsonObject property = entry.getValue().getAsJsonObject();
 
             if (property.get("anyOf") != null) {
-                /** TODO
-                 *  mixed types for a property
-                 */
-            System.out.println("TODO mixed types for a property");
+                JsonArray types = property.getAsJsonArray("anyOf");
+
+                for(JsonElement element : types) {
+                    JsonObject type = element.getAsJsonObject();
+
+                    int attType       = TypeMapper.jsonToInt(type.get("type"));
+                    String attName    = attributeName + "_" + TypeMapper.jsonToString(type.get("type"));
+
+                    if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_OBJECT) {
+                        makeRelation( attName + "Object", type.getAsJsonObject("properties"));
+
+                    } else if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_ARRAY) {
+                        handleArrayRelations( attName + "Array", type );
+
+                    } else {
+                    }
+
+                    relation.addAttribtue( new Attribute( attName, attType ) );
+                }
 
             } else {
                 if (TypeMapper.jsonToInt(property.get("type")) == TypeMapper.TYPE_OBJECT) {
