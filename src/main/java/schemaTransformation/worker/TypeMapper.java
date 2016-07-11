@@ -16,6 +16,15 @@ public class TypeMapper {
     public static int TYPE_ORDER    = 6;
     public static int TYPE_STRING   = 7;
 
+    public static String SQL_ARRAY    = "INT";
+    public static String SQL_BOOL     = "BOOLEAN";
+    public static String SQL_ID       = "INT";
+    public static String SQL_NULL     = "NULL";
+    public static String SQL_NUMBER   = "DOUBLE";
+    public static String SQL_OBJECT   = "INT";
+    public static String SQL_ORDER    = "INT";
+    public static String SQL_STRING   = "MEDIUMTEXT";
+
     public static String STRING_ARRAY    = "array";
     public static String STRING_BOOL     = "boolean";
     public static String STRING_ID       = "id";
@@ -24,6 +33,18 @@ public class TypeMapper {
     public static String STRING_OBJECT   = "object";
     public static String STRING_ORDER    = "order";
     public static String STRING_STRING   = "string";
+
+    public static String constantToSQL(int type) {
+        if (        type == TYPE_ARRAY  ) { return SQL_ARRAY;
+        } else if ( type == TYPE_BOOL   ) { return SQL_BOOL;
+        } else if ( type == TYPE_ID     ) { return SQL_ID;
+        } else if ( type == TYPE_NUMBER ) { return SQL_NUMBER;
+        } else if ( type == TYPE_OBJECT ) { return SQL_OBJECT;
+        } else if ( type == TYPE_ORDER  ) { return SQL_ORDER;
+        } else if ( type == TYPE_STRING ) { return SQL_STRING;
+        } else {                            return SQL_NULL;
+        }
+    }
 
     public static String constantToString(int type) {
         if (        type == TYPE_ARRAY  ) { return STRING_ARRAY;

@@ -11,6 +11,9 @@ public class Main {
      *  - put path separator in a class constant
      *  - do name check before naming a node 'anyOf'
      *  - check property names for path separators
+     *  - relation names must me unique
+     *  - attribute mapping
+     *  - relation tree?
      */
 
     public static void main(String[] args) {
@@ -43,6 +46,7 @@ public class Main {
             Transformer transformer = new Transformer(object.get("title").toString(), properties);
             transformer.run();
             transformer.print();
+            transformer.printSQL();
         }
     }
 }

@@ -22,6 +22,30 @@ public class Relation {
         attributes.add(attribute);
     }
 
+    public String toSQL() {
+        /**
+         * CREATE TABLE `test`.`testing` (
+         * `ID` INT NOT NULL AUTO_INCREMENT ,
+         * `order` INT NOT NULL ,
+         * `foreign` INT NOT NULL ,
+         * `chars` MEDIUMTEXT NULL ,
+         * `number` DOUBLE NULL ,
+         * `boolean` BOOLEAN NULL ,
+         * PRIMARY KEY (`ID`)) ENGINE = InnoDB;
+         */
+        String sql = "";
+
+        sql += "CREATE TABLE `some_db`.`" + name + "`(";
+
+        for(Attribute attribute : attributes) {
+            sql += attribute.toSQL() + ", ";
+        }
+
+        sql += "PRIMARY KEY (`ID`))";
+
+        return sql;
+    }
+
     public String toString() {
         String ret = "";
         ret += "Relation " + name + "\n";
