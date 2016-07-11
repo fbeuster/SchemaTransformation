@@ -9,10 +9,7 @@ import schemaExtraction.capsules.Node;
 import schemaExtraction.io.Storage;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created by Jacob Langner
@@ -33,7 +30,7 @@ public class Visualizer {
         objectsToDcoument();
     }
 
-    private Document typesToDoument(Node n, int parentOcc, int nodeLevel, String nodePath, TreeSet<String> propType, String nodeName) {
+    private Document typesToDoument(Node n, int parentOcc, int nodeLevel, String nodePath, String propType, String nodeName) {
         Document schema = new Document();
 
         // store description of current node
@@ -42,7 +39,13 @@ public class Visualizer {
         }
         int nodeOcc     = n.countDocId();
         float occRel    = nodeOcc * 100 / parentOcc;
-        String desc     = "Occurence: " + nodeOcc + "/" + parentOcc + ", " + occRel + "%";
+        String desc     = "Document occurrence: " + nodeOcc + "/" + parentOcc + ", " + occRel + "%";
+
+        if (n.getPropType().size() > 1) {
+            int memberOcc   = n.getPropType().get(propType);
+            float memRel    = memberOcc * 100 / parentOcc;
+            desc            += "; Member occurrence: " + memberOcc + "/" + parentOcc + ", " + memRel + "%";
+        }
         schema.append("description", desc);
 
         // node contains JsonObject
@@ -110,12 +113,14 @@ public class Visualizer {
             if (n.getPath().equalsIgnoreCase(nodePath)) {
 
                 // store data type of current node
-                TreeSet<String> propType = n.getPropType();
+                HashMap<String, Integer> propType = n.getPropType();
 
                 if (propType.size() == 1) {
-                    schema.append("type", propType.first());
+                    Map.Entry<String, Integer> first = propType.entrySet().iterator().next();
 
-                    Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, propType, nodeName);
+                    schema.append("type", first.getKey());
+
+                    Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, first.getKey(), nodeName);
                     for (String key : subSchema.keySet()) {
                         schema.append(key, subSchema.get(key));
                     }
@@ -123,14 +128,11 @@ public class Visualizer {
                 } else {
                     ArrayList<Document> types = new ArrayList<>();
 
-                    for (String type : propType) {
+                    for (Map.Entry<String, Integer> type : propType.entrySet()) {
                         Document typeSchema = new Document();
-                        typeSchema.append("type", type);
+                        typeSchema.append("type", type.getKey());
 
-                        TreeSet<String> typeTree = new TreeSet<>();
-                        typeTree.add(type);
-
-                        Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, typeTree, nodeName);
+                        Document subSchema = typesToDoument(n, parentOcc, nodeLevel, nodePath, type.getKey(), nodeName);
                         for (String key : subSchema.keySet()) {
                             typeSchema.append(key, subSchema.get(key));
                         }

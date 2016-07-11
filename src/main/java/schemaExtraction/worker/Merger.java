@@ -5,6 +5,7 @@ import schemaExtraction.capsules.Node;
 import schemaExtraction.io.Storage;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Created by Jacob Langner
@@ -77,8 +78,8 @@ public class Merger {
                         b.setName("Merged schema of '" + a.getName() + "' and '" + b.getName() + "'!");
                     }
 
-                    for (String propType : a.getPropType()) {
-                        b.setPropType(propType);
+                    for (Map.Entry<String, Integer> propType : a.getPropType().entrySet()) {
+                        b.setPropType(propType.getKey());
                     }
 
                     for (String docId : a.getDocId()) {

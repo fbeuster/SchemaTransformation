@@ -2,6 +2,7 @@ package schemaExtraction.capsules;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeSet;
 
 /**
@@ -19,7 +20,7 @@ public class Node implements Serializable {
 
     private ArrayList<ArrayList<String>> arrayOrder  = new ArrayList<>();
     private TreeSet<String> docId       = new TreeSet<>();
-    private TreeSet<String> propType    = new TreeSet<>();
+    private HashMap<String, Integer> propType    = new HashMap<>();
 
     /**
      * @return number of documents with this node
@@ -67,7 +68,7 @@ public class Node implements Serializable {
 
     public String getPath() { return path; }
 
-    public TreeSet<String> getPropType() {
+    public HashMap<String, Integer> getPropType() {
         return propType;
     }
 
@@ -96,8 +97,11 @@ public class Node implements Serializable {
     public void setPath(String path) { this.path = path; }
 
     public void setPropType(String propType) {
-        if (this.propType.contains(propType) == false) {
-            this.propType.add(propType);
+        if (this.propType.get(propType) == null) {
+            this.propType.put(propType, 1);
+
+        } else {
+            this.propType.put(propType, this.propType.get(propType) + 1);
         }
     }
 }
