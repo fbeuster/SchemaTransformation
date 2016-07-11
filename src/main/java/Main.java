@@ -43,7 +43,7 @@ public class Main {
         if (object != null) {
             JsonObject properties = object.get("properties").getAsJsonObject();
 
-            Transformer transformer = new Transformer(object.get("title").toString(), properties);
+            Transformer transformer = new Transformer(object.get("title").getAsString(), properties);
             transformer.run();
             transformer.print();
             transformer.printSQL();
