@@ -25,6 +25,18 @@ public class TypeMapper {
     public static String STRING_ORDER    = "order";
     public static String STRING_STRING   = "string";
 
+    public static String constantToString(int type) {
+        if (        type == TYPE_ARRAY  ) { return STRING_ARRAY;
+        } else if ( type == TYPE_BOOL   ) { return STRING_BOOL;
+        } else if ( type == TYPE_ID     ) { return STRING_ID;
+        } else if ( type == TYPE_NUMBER ) { return STRING_NUMBER;
+        } else if ( type == TYPE_OBJECT ) { return STRING_OBJECT;
+        } else if ( type == TYPE_ORDER  ) { return STRING_ORDER;
+        } else if ( type == TYPE_STRING ) { return STRING_STRING;
+        } else {                            return STRING_NULL;
+        }
+    }
+
     public static int jsonToInt(JsonElement element) {
         String elementString = element.toString();
 

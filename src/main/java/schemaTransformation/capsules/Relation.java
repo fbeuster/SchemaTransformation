@@ -1,5 +1,7 @@
 package schemaTransformation.capsules;
 
+import schemaTransformation.worker.TypeMapper;
+
 import java.util.ArrayList;
 
 /**
@@ -25,7 +27,7 @@ public class Relation {
         ret += "Relation " + name + "\n";
 
         for (Attribute attribute : attributes) {
-            ret += "- " + attribute.getName() + " : " + attribute.getType() + "\n";
+            ret += "- " + attribute.getName() + " : " + TypeMapper.constantToString(attribute.getType()) + "\n";
         }
 
         return ret;
