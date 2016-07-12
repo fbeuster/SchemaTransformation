@@ -94,7 +94,7 @@ public class Transformer {
     }
 
     private void makeRelation(String name, JsonObject object) {
-        makeRelation(name, object, new ArrayList<>());
+        makeRelation(name, object, new ArrayList<Attribute>());
     }
 
     private void makeRelation(String name, JsonObject object, ArrayList<Attribute> extra) {
