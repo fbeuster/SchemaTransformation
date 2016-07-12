@@ -1,5 +1,6 @@
 import com.google.gson.*;
 import schemaExtraction.Extraction;
+import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
 
 
@@ -47,6 +48,10 @@ public class Main {
             transformer.run();
             transformer.print();
             transformer.printSQL();
+
+            Optimizer optimizer = new Optimizer(transformer.getRelations());
+            optimizer.run();
+            optimizer.printResults();
         }
     }
 }

@@ -22,6 +22,14 @@ public class Relation {
         attributes.add(attribute);
     }
 
+    public ArrayList<Attribute> getAttributes() {
+        return attributes;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public String toSQL() {
         /**
          * CREATE TABLE `test`.`testing` (

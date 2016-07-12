@@ -27,6 +27,10 @@ public class Transformer {
         relations = new ArrayList<>();
     }
 
+    public ArrayList<Relation> getRelations() {
+        return relations;
+    }
+
     private void handleArrayRelations(String name, JsonObject object) {
         if (object.getAsJsonObject("items").get("anyOf") != null) {
 
@@ -158,6 +162,7 @@ public class Transformer {
         for (Relation relation : relations) {
             System.out.println(relation.toSQL());
         }
+        System.out.println();
     }
 
     public void run() {
