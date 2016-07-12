@@ -154,9 +154,9 @@ public class Transformer {
         }
     }
 
-    public void printSQL() {
+    public void printSQL(String dbName) {
         for (Relation relation : relations) {
-            System.out.println(relation.toSQL());
+            System.out.println(relation.toSQL(dbName));
         }
     }
 

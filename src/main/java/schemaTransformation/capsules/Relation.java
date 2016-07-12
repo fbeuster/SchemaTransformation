@@ -22,7 +22,7 @@ public class Relation {
         attributes.add(attribute);
     }
 
-    public String toSQL() {
+    public String toSQL(String dbName) {
         /**
          * CREATE TABLE `test`.`testing` (
          * `ID` INT NOT NULL AUTO_INCREMENT ,
@@ -35,7 +35,7 @@ public class Relation {
          */
         String sql = "";
 
-        sql += "CREATE TABLE `some_db`.`" + name + "`(";
+        sql += "CREATE TABLE `" + dbName + "`.`" + name + "`(";
 
         for(Attribute attribute : attributes) {
             sql += attribute.toSQL() + ", ";

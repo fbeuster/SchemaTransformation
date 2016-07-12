@@ -46,7 +46,7 @@ public class Main {
             Transformer transformer = new Transformer(object.get("title").getAsString(), properties);
             transformer.run();
             transformer.print();
-            transformer.printSQL();
+            transformer.printSQL("mydb");
         }
     }
 }
