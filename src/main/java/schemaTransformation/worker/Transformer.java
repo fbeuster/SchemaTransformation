@@ -184,13 +184,6 @@ public class Transformer {
         }
     }
 
-    public void printSQL() {
-        for (Relation relation : relations) {
-            System.out.println(relation.toSQL());
-        }
-        System.out.println();
-    }
-
     public void run() {
         makeRelation(name, root);
     }

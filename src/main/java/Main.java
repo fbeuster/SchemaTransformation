@@ -2,6 +2,7 @@ import com.google.gson.*;
 import org.yaml.snakeyaml.Yaml;
 import schemaExtraction.Extraction;
 import schemaTransformation.capsules.Config;
+import schemaTransformation.capsules.Relation;
 import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
 
@@ -29,7 +30,9 @@ public class Main {
     public static void main(String[] args) {
         Config config = new Config();
 
-        Extraction extraction = new Extraction( config.getString("database"), config.getString("collection") );
+        Extraction extraction = new Extraction(
+                config.getString("mongodb.database"),
+                config.getString("mongodb.collection") );
         extraction.run();
 
         JsonObject object = null;
@@ -58,7 +61,10 @@ public class Main {
             Transformer transformer = new Transformer(object.get("title").getAsString(), properties, config);
             transformer.run();
             transformer.print();
-            transformer.printSQL();
+
+            for (Relation relation : transformer.getRelations()) {
+                System.out.println(relation.toSQL(config));
+            }
 
             Optimizer optimizer = new Optimizer(transformer.getRelations());
             optimizer.run();

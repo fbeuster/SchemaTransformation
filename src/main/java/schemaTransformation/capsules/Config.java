@@ -7,11 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
- * Created by Felix on 15.07.2016.
+ * Created by Felix Beuster on 15.07.2016.
  */
 public class Config {
 
@@ -79,7 +77,7 @@ public class Config {
 
     public String getString(String key) {
         Object r;
-        return (r = get(key)) == null ? null : r.toString();
+        return (r = get(key)) == null ? "" : r.toString();
     }
 
     private void setDefaults() {

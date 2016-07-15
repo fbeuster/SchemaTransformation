@@ -36,26 +36,16 @@ public class Relation {
         return name;
     }
 
-    public String toSQL() {
-        /**
-         * CREATE TABLE `test`.`testing` (
-         * `ID` INT NOT NULL AUTO_INCREMENT ,
-         * `order` INT NOT NULL ,
-         * `foreign` INT NOT NULL ,
-         * `chars` MEDIUMTEXT NULL ,
-         * `number` DOUBLE NULL ,
-         * `boolean` BOOLEAN NULL ,
-         * PRIMARY KEY (`ID`)) ENGINE = InnoDB;
-         */
+    public String toSQL(Config config) {
         String sql = "";
 
-        sql += "CREATE TABLE `some_db`.`" + name + "`(";
+        sql += "CREATE TABLE `" + config.getString("sql.database") + "`.`" + name + "`(";
 
         for(Attribute attribute : attributes) {
             sql += attribute.toSQL() + ", ";
         }
 
-        sql += "PRIMARY KEY (`ID`))";
+        sql += "PRIMARY KEY (`" + config.getString("transformation.fields.primary_key_name") + "`))";
 
         return sql;
     }

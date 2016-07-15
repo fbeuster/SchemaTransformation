@@ -1,5 +1,6 @@
-database: test
-collection: car_orders
+mongodb:
+  database: test
+  collection: car_orders
 transformation:
   fields:
     array_suffix: Array
@@ -7,3 +8,5 @@ transformation:
     order_field_name: order
     primary_key_name: ID
     value_field_name: value
+sql:
+  database: myDB
