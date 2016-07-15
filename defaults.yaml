@@ -1,0 +1,12 @@
+mongodb:
+  database: myDB
+  collection: myCollection
+transformation:
+  fields:
+    array_suffix: Array
+    object_suffix: Object
+    order_field_name: order
+    primary_key_name: ID
+    value_field_name: value
+sql:
+  database: myDB

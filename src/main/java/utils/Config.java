@@ -1,4 +1,4 @@
-package schemaTransformation.capsules;
+package utils;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -26,7 +26,14 @@ public class Config {
             config = new HashMap<>();
         }
 
-        setDefaults();
+        try {
+            InputStream io = new FileInputStream(new File("defautls.yaml"));
+            Yaml yaml = new Yaml();
+            defaults = (HashMap) yaml.load(io);
+
+        } catch (FileNotFoundException e) {
+            defaults = new HashMap<>();
+        }
     }
 
     public Object get(String key) {
@@ -78,20 +85,5 @@ public class Config {
     public String getString(String key) {
         Object r;
         return (r = get(key)) == null ? "" : r.toString();
-    }
-
-    private void setDefaults() {
-        HashMap<String, Object> fields = new HashMap<>();
-        fields.put("array_suffixs", Relation.DEFAULT_ARRAY_SUFFIX);
-        fields.put("object_suffix", Relation.DEFAULT_OBJECT_SUFFIX);
-        fields.put("order_field_name", Relation.DEFAULT_ORDER_FIELD_NAME);
-        fields.put("primary_key_name", Relation.DEFAULT_PRIMARY_KEY_NAME);
-        fields.put("value_field_name", Relation.DEFAULT_VALUE_FIELD_NAME);
-
-        HashMap<String, Object> transformation = new HashMap<>();
-        transformation.put("fields", fields);
-
-        defaults = new HashMap<>();
-        defaults.put("transformation", transformation);
     }
 }

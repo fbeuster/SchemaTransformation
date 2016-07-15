@@ -1,17 +1,9 @@
 import com.google.gson.*;
-import org.yaml.snakeyaml.Yaml;
 import schemaExtraction.Extraction;
-import schemaTransformation.capsules.Config;
 import schemaTransformation.capsules.Relation;
 import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import utils.Config;
 
 
 public class Main {

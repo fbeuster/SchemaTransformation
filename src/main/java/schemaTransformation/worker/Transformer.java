@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import schemaTransformation.capsules.Attribute;
-import schemaTransformation.capsules.Config;
+import utils.Config;
 import schemaTransformation.capsules.Relation;
 
 import java.util.ArrayList;

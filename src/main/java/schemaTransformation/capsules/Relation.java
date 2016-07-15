@@ -1,6 +1,7 @@
 package schemaTransformation.capsules;
 
 import schemaTransformation.worker.TypeMapper;
+import utils.Config;
 
 import java.util.ArrayList;
 
@@ -8,12 +9,6 @@ import java.util.ArrayList;
  * Created by Felix Beuster on 03.07.2016.
  */
 public class Relation {
-
-    public static String DEFAULT_ARRAY_SUFFIX       = "Array";
-    public static String DEFAULT_OBJECT_SUFFIX      = "Object";
-    public static String DEFAULT_ORDER_FIELD_NAME   = "order";
-    public static String DEFAULT_PRIMARY_KEY_NAME   = "ID";
-    public static String DEFAULT_VALUE_FIELD_NAME   = "value";
 
     private ArrayList<Attribute> attributes;
     private String name;
