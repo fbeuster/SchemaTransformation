@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import schemaTransformation.capsules.Attribute;
+import schemaTransformation.capsules.Config;
 import schemaTransformation.capsules.Relation;
 
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ public class Transformer {
 
     private ArrayList<Relation> relations;
 
+    private Config config;
+
     private JsonObject root;
 
     private String arraySuffix;
@@ -25,16 +28,13 @@ public class Transformer {
     private String primaryKeyName;
     private String valueFieldName;
 
-    public Transformer(String name, JsonObject object) {
-        this.name = name;
-        this.root = object;
+    public Transformer(String name, JsonObject object, Config config) {
+        this.config = config;
+        this.name   = name;
+        this.root   = object;
+        relations   = new ArrayList<>();
 
-        arraySuffix     = Relation.DEFAULT_ARRAY_SUFFIX;
-        objectSuffix    = Relation.DEFAULT_OBJECT_SUFFIX;
-        orderFieldName  = Relation.DEFAULT_ORDER_FIELD_NAME;
-        primaryKeyName  = Relation.DEFAULT_PRIMARY_KEY_NAME;
-        relations       = new ArrayList<>();
-        valueFieldName  = Relation.DEFAULT_VALUE_FIELD_NAME;
+        loadConfig();
     }
 
     public ArrayList<Relation> getRelations() {
@@ -103,6 +103,14 @@ public class Transformer {
         }
 
         return attributes;
+    }
+
+    private void loadConfig() {
+        arraySuffix     = config.get("transformation.fields.array_suffix").toString();
+        objectSuffix    = config.get("transformation.fields.object_suffix").toString();
+        orderFieldName  = config.get("transformation.fields.order_field_name").toString();
+        primaryKeyName  = config.get("transformation.fields.primary_key_name").toString();
+        valueFieldName  = config.get("transformation.fields.value_field_name").toString();
     }
 
     private void makeArrayRelation(String name, JsonObject object) {
