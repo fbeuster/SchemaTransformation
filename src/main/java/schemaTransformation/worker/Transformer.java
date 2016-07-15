@@ -38,23 +38,8 @@ public class Transformer {
             relation.addAttribtue(new Attribute("ID", TypeMapper.TYPE_ID));
             relation.addAttribtue(new Attribute("order", TypeMapper.TYPE_ORDER));
 
-            JsonArray types = object.getAsJsonObject("items").getAsJsonArray("anyOf");
-            for(JsonElement element : types) {
-                JsonObject type = element.getAsJsonObject();
-
-                int attributeType       = TypeMapper.jsonToInt(type.get("type"));
-                String attributeName    = "value_" + TypeMapper.jsonToString(type.get("type"));
-
-                if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_OBJECT) {
-                    makeRelation( name + "Object", type.getAsJsonObject("properties"));
-
-                } else if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_ARRAY) {
-                    handleArrayRelations( name + "Array", type );
-
-                } else {
-                }
-
-                relation.addAttribtue( new Attribute( attributeName, attributeType ) );
+            for (Attribute attribute : handleMultipleTypes(object.getAsJsonObject("items"), "value", name)) {
+                relation.addAttribtue(attribute);
             }
 
             relations.add(relation);
@@ -75,6 +60,35 @@ public class Transformer {
                 makePrimitiveRelation(name + "Array", object.getAsJsonObject("items").get("type"));
             }
         }
+    }
+
+    private ArrayList<Attribute> handleMultipleTypes(JsonObject object, String prepend, String name) {
+        ArrayList<Attribute> attributes = new ArrayList<>();
+
+        JsonArray types = object.getAsJsonArray("anyOf");
+        for(JsonElement element : types) {
+            JsonObject type = element.getAsJsonObject();
+
+            int attributeType       = TypeMapper.jsonToInt(type.get("type"));
+            String attributeName    = prepend + "_" + TypeMapper.jsonToString(type.get("type"));
+
+            if (name == null) {
+                name = attributeName;
+            }
+
+            if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_OBJECT) {
+                makeRelation( name + "Object", type.getAsJsonObject("properties"));
+
+            } else if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_ARRAY) {
+                handleArrayRelations( name + "Array", type );
+
+            } else {
+            }
+
+            attributes.add( new Attribute( attributeName, attributeType ) );
+        }
+
+        return attributes;
     }
 
     private void makeArrayRelation(String name, JsonObject object) {
@@ -114,24 +128,8 @@ public class Transformer {
             JsonObject property = entry.getValue().getAsJsonObject();
 
             if (property.get("anyOf") != null) {
-                JsonArray types = property.getAsJsonArray("anyOf");
-
-                for(JsonElement element : types) {
-                    JsonObject type = element.getAsJsonObject();
-
-                    int attType       = TypeMapper.jsonToInt(type.get("type"));
-                    String attName    = attributeName + "_" + TypeMapper.jsonToString(type.get("type"));
-
-                    if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_OBJECT) {
-                        makeRelation( attName + "Object", type.getAsJsonObject("properties"));
-
-                    } else if (TypeMapper.jsonToInt(type.get("type")) == TypeMapper.TYPE_ARRAY) {
-                        handleArrayRelations( attName + "Array", type );
-
-                    } else {
-                    }
-
-                    relation.addAttribtue( new Attribute( attName, attType ) );
+                for (Attribute attribute : handleMultipleTypes(property, attributeName, null)) {
+                    relation.addAttribtue(attribute);
                 }
 
             } else {
