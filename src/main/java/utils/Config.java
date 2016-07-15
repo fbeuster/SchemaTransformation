@@ -61,6 +61,11 @@ public class Config {
         return value;
     }
 
+    public Boolean getBoolean(String key) {
+        Object r;
+        return (r = get(key)) == null ? false : (boolean) r;
+    }
+
     public Object getDefault(String key) {
         String[] keys   = key.split("\\.");
         HashMap map     = defaults;

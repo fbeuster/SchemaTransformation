@@ -22,9 +22,7 @@ public class Main {
     public static void main(String[] args) {
         Config config = new Config();
 
-        Extraction extraction = new Extraction(
-                config.getString("mongodb.database"),
-                config.getString("mongodb.collection") );
+        Extraction extraction = new Extraction(config);
         extraction.run();
 
         JsonObject object = null;

@@ -1,6 +1,9 @@
 mongodb:
   database: test
   collection: car_orders
+extraction:
+  debug:
+    json_schema: true
 transformation:
   fields:
     array_suffix: Array

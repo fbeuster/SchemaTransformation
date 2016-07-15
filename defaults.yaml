@@ -1,6 +1,15 @@
 mongodb:
   database: myDB
   collection: myCollection
+extraction:
+  debug:
+    cycle_numbers: false
+    nodes_edges: false
+    json_schema: false
+  features:
+    merge: false
+    save_load: false
+    simple_prop_types: false
 transformation:
   fields:
     array_suffix: Array

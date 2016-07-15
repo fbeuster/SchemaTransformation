@@ -10,7 +10,7 @@ import com.google.gson.JsonParser;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import schemaExtraction.Extraction;
-import schemaExtraction.Configuration;
+import utils.Config;
 
 import java.util.*;
 
@@ -24,6 +24,8 @@ public class Extractor {
 
     private Calendar startTime;
 
+    private Config config;
+
     private int cycles;
 
     private JsonParser parser;
@@ -33,13 +35,14 @@ public class Extractor {
     private MongoDatabase mdb;
 
     private String collection;
-    private String datatabase;
+    private String database;
 
-    public Extractor(Extraction main, String database, String collection) {
-        this.main = main;
+    public Extractor(Extraction main, Config config) {
+        this.main   = main;
+        this.config = config;
 
-        this.collection = collection;
-        this.datatabase = database;
+        database   = config.getString("mongodb.database");
+        collection = config.getString("mongodb.collection");
 
         mc      = new MongoClient();
         mdb     = mc.getDatabase(database);
@@ -155,7 +158,7 @@ public class Extractor {
 
         }
 
-        if (Configuration.PRINT_CYCLE_NUMBER) {
+        if (config.getBoolean("extraction.debug.cycle_numbers")) {
             cycles++;
 
             if (cycles % 1000000 == 0) {
@@ -170,7 +173,7 @@ public class Extractor {
     }
 
     private String getJsonType(JsonElement e) {
-        if (Configuration.USE_SIMPLE_PROP_TYPES) {
+        if (config.getBoolean("extraction.features.simple_prop_types")) {
             // method body for simple property types
             if (e.isJsonObject()) {         return "JsonObject";
             } else if (e.isJsonArray()) {   return "JsonArray";
