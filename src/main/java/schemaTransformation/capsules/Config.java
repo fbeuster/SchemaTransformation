@@ -77,6 +77,11 @@ public class Config {
         return value;
     }
 
+    public String getString(String key) {
+        Object r;
+        return (r = get(key)) == null ? null : r.toString();
+    }
+
     private void setDefaults() {
         HashMap<String, Object> fields = new HashMap<>();
         fields.put("array_suffixs", Relation.DEFAULT_ARRAY_SUFFIX);

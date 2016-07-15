@@ -106,11 +106,11 @@ public class Transformer {
     }
 
     private void loadConfig() {
-        arraySuffix     = config.get("transformation.fields.array_suffix").toString();
-        objectSuffix    = config.get("transformation.fields.object_suffix").toString();
-        orderFieldName  = config.get("transformation.fields.order_field_name").toString();
-        primaryKeyName  = config.get("transformation.fields.primary_key_name").toString();
-        valueFieldName  = config.get("transformation.fields.value_field_name").toString();
+        arraySuffix     = config.getString("transformation.fields.array_suffix");
+        objectSuffix    = config.getString("transformation.fields.object_suffix");
+        orderFieldName  = config.getString("transformation.fields.order_field_name");
+        primaryKeyName  = config.getString("transformation.fields.primary_key_name");
+        valueFieldName  = config.getString("transformation.fields.value_field_name");
     }
 
     private void makeArrayRelation(String name, JsonObject object) {

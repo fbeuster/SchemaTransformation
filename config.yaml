@@ -1,3 +1,5 @@
+database: test
+collection: car_orders
 transformation:
   fields:
     array_suffix: Array

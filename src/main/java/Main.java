@@ -29,7 +29,7 @@ public class Main {
     public static void main(String[] args) {
         Config config = new Config();
 
-        Extraction extraction = new Extraction("test", "car_orders");
+        Extraction extraction = new Extraction( config.getString("database"), config.getString("collection") );
         extraction.run();
 
         JsonObject object = null;
