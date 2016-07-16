@@ -1,0 +1,15 @@
+mongodb:
+  database: test
+  collection: car_orders
+extraction:
+  debug:
+    json_schema: true
+transformation:
+  fields:
+    array_suffix: Array
+    object_suffix: Object
+    order_field_name: order
+    primary_key_name: ID
+    value_field_name: value
+sql:
+  database: myDB

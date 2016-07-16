@@ -1,6 +1,7 @@
 package schemaTransformation.capsules;
 
 import schemaTransformation.worker.TypeMapper;
+import utils.Config;
 
 import java.util.ArrayList;
 
@@ -22,26 +23,24 @@ public class Relation {
         attributes.add(attribute);
     }
 
-    public String toSQL(String dbName) {
-        /**
-         * CREATE TABLE `test`.`testing` (
-         * `ID` INT NOT NULL AUTO_INCREMENT ,
-         * `order` INT NOT NULL ,
-         * `foreign` INT NOT NULL ,
-         * `chars` MEDIUMTEXT NULL ,
-         * `number` DOUBLE NULL ,
-         * `boolean` BOOLEAN NULL ,
-         * PRIMARY KEY (`ID`)) ENGINE = InnoDB;
-         */
+    public ArrayList<Attribute> getAttributes() {
+        return attributes;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String toSQL(Config config) {
         String sql = "";
 
-        sql += "CREATE TABLE `" + dbName + "`.`" + name + "`(";
+        sql += "CREATE TABLE `" + config.getString("sql.database") + "`.`" + name + "`(";
 
         for(Attribute attribute : attributes) {
             sql += attribute.toSQL() + ", ";
         }
 
-        sql += "PRIMARY KEY (`ID`))";
+        sql += "PRIMARY KEY (`" + config.getString("transformation.fields.primary_key_name") + "`))";
 
         return sql;
     }

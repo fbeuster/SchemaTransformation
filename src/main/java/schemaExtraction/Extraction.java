@@ -4,6 +4,7 @@ import schemaExtraction.worker.Extractor;
 import schemaExtraction.io.Storage;
 import schemaExtraction.worker.Merger;
 import schemaExtraction.worker.Visualizer;
+import utils.Config;
 
 import java.util.Calendar;
 
@@ -13,6 +14,8 @@ import java.util.Calendar;
  */
 public class Extraction {
 
+    private Config config;
+
     private long docCount;
 
     private String collection;
@@ -20,9 +23,10 @@ public class Extraction {
 
     private Storage storage;
 
-    public Extraction(String database, String collection) {
-        this.database = database;
-        this.collection = collection;
+    public Extraction(Config config) {
+        this.config     = config;
+        this.database   = config.getString("mongodb.database");
+        this.collection = config.getString("mongodb.collection");
     }
 
     public Storage getStorage() {
@@ -51,7 +55,7 @@ public class Extraction {
         System.out.println();
         System.out.println("######## Testarea for retrieving a MongoDB collection and iterating through the documents with the extractSchema algorithm ########");
 
-        Extractor se = new Extractor(this, database, collection);
+        Extractor se = new Extractor(this, config);
         docCount = se.countDocs();
 
         Calendar startExtraction = Calendar.getInstance();
@@ -61,7 +65,7 @@ public class Extraction {
     }
 
     private void merge(String collectionName) {
-        if (Configuration.MERGE_STORAGES) {
+        if (config.getBoolean("extraction.features.merge")) {
             System.out.println("######## Testarea for merging 2 schemes ########");
 
             Storage newStorage = new Storage();
@@ -81,14 +85,14 @@ public class Extraction {
     }
 
     private void printObjects() {
-        if (Configuration.PRINT_NODES_EDGES) {
+        if (config.getBoolean("extraction.debug.nodes_edges")) {
             storage.printNodes(docCount);
             storage.printEdges(docCount);
         }
     }
 
     private void saveAndLoad() {
-        if (Configuration.SAVE_AND_LOAD) {
+        if (config.getBoolean("extraction.features.save_load")) {
             System.out.println("######## Testarea for storing and loading the internal schema to and from file ########");
 
             Calendar startSaveAndLoad = Calendar.getInstance();
@@ -104,7 +108,7 @@ public class Extraction {
     }
 
     private void visualize() {
-        if (Configuration.PRINT_JSON_SCHEMA) {
+        if (config.getBoolean("extraction.debug.json_schema")) {
             Visualizer visualizer = new Visualizer(storage, database);
             System.out.println(visualizer.toString());
             System.out.println();

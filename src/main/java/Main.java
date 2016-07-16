@@ -1,6 +1,9 @@
 import com.google.gson.*;
 import schemaExtraction.Extraction;
+import schemaTransformation.capsules.Relation;
+import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
+import utils.Config;
 
 
 public class Main {
@@ -17,7 +20,9 @@ public class Main {
      */
 
     public static void main(String[] args) {
-        Extraction extraction = new Extraction("test", "car_orders");
+        Config config = new Config();
+
+        Extraction extraction = new Extraction(config);
         extraction.run();
 
         JsonObject object = null;
@@ -43,10 +48,17 @@ public class Main {
         if (object != null) {
             JsonObject properties = object.get("properties").getAsJsonObject();
 
-            Transformer transformer = new Transformer(object.get("title").getAsString(), properties);
+            Transformer transformer = new Transformer(object.get("title").getAsString(), properties, config);
             transformer.run();
             transformer.print();
-            transformer.printSQL("mydb");
+
+            for (Relation relation : transformer.getRelations()) {
+                System.out.println(relation.toSQL(config));
+            }
+
+            Optimizer optimizer = new Optimizer(transformer.getRelations());
+            optimizer.run();
+            optimizer.printResults();
         }
     }
 }
