@@ -57,11 +57,11 @@ public class Transformer {
             relation.addAttribtue(new Attribute(orderFieldName, TypeMapper.TYPE_ORDER));
 
             for (Attribute attribute : handleMultipleTypes(object.getAsJsonObject("items"), valueFieldName, name)) {
+                JsonArray types = object.getAsJsonObject("items").getAsJsonArray("anyOf");
+                String path     = types.get(0).getAsJsonObject().get("path").getAsString();
+
                 relation.addAttribtue(attribute);
-                dataMapper.add(
-                        object.getAsJsonObject("items").getAsJsonArray("anyOf").get(0).getAsJsonObject().get("path").getAsString(),
-                        name + arraySuffix,
-                        attribute);
+                dataMapper.add( path, name + arraySuffix, attribute );
             }
 
             relations.add(relation);
@@ -116,6 +116,21 @@ public class Transformer {
         return attributes;
     }
 
+    private Attribute handleSingleType(String attributeName, String propertyName, JsonObject property) {
+        int attributeType = TypeMapper.jsonToInt(property.get("type"));
+
+        if (attributeType == TypeMapper.TYPE_OBJECT) {
+            attributeName += primaryKeyName;
+            makeRelation(propertyName, property.getAsJsonObject("properties"));
+
+        } else if (attributeType == TypeMapper.TYPE_ARRAY) {
+            attributeName += primaryKeyName;
+            handleArrayRelations(propertyName, property);
+        }
+
+        return new Attribute(attributeName, attributeType);
+    }
+
     private void loadConfig() {
         arraySuffix     = config.getString("transformation.fields.array_suffix");
         objectSuffix    = config.getString("transformation.fields.object_suffix");
@@ -153,41 +168,33 @@ public class Transformer {
         Relation relation = new Relation(name);
         relation.addAttribtue(new Attribute(primaryKeyName, TypeMapper.TYPE_ID));
 
+        /** adding extras **/
         for (Attribute a : extra) {
             relation.addAttribtue(a);
         }
 
+        /** adding properties **/
         for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
             String attributeName = entry.getKey();
             JsonObject property = entry.getValue().getAsJsonObject();
 
             if (property.get("anyOf") != null) {
                 /** multiple type attribute **/
-
+                int i = 0;
                 for (Attribute attribute : handleMultipleTypes(property, attributeName, null)) {
+                    String path = property.getAsJsonArray("anyOf").get(i).getAsJsonObject().get("path").getAsString();
+
                     relation.addAttribtue(attribute);
+                    dataMapper.add( path, name, attribute );
+
+                    i++;
                 }
 
             } else {
                 /** single type attribute **/
-
-                int attributeType = TypeMapper.jsonToInt(property.get("type"));
-
-                if (attributeType == TypeMapper.TYPE_OBJECT) {
-                    attributeName += primaryKeyName;
-                    makeRelation(entry.getKey(), property.getAsJsonObject("properties"));
-
-                } else if (attributeType == TypeMapper.TYPE_ARRAY) {
-                    attributeName += primaryKeyName;
-                    handleArrayRelations(entry.getKey(), property);
-
-                } else {
-                }
-
-                Attribute attribute = new Attribute(attributeName, attributeType);
-                relation.addAttribtue(attribute);
-
-                dataMapper.add(property.get("path").getAsString(), name, attribute);
+                Attribute attribute = handleSingleType(attributeName, entry.getKey(), property);
+                relation.addAttribtue( attribute );
+                dataMapper.add( property.get("path").getAsString(), name, attribute );
             }
         }
 
