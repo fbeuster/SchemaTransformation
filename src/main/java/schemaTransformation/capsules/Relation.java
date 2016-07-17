@@ -31,6 +31,16 @@ public class Relation {
         return name;
     }
 
+    public boolean hasAttribute(String name) {
+        for (Attribute attribute : attributes) {
+            if (attribute.getName().equals( name )) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public String toSQL(Config config) {
         String sql = "";
 

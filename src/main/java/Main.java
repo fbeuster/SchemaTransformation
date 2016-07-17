@@ -60,7 +60,7 @@ public class Main {
             optimizer.run();
             optimizer.printResults();
 
-//            System.out.println(transformer.getDataMapper());
+            System.out.println(transformer.getDataMappingLog());
         }
     }
 }

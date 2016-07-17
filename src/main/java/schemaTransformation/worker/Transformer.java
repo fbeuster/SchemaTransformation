@@ -57,7 +57,7 @@ public class Transformer {
             relation.addAttribtue(new Attribute(primaryKeyName, TypeMapper.TYPE_ID));
             relation.addAttribtue(new Attribute(orderFieldName, TypeMapper.TYPE_ORDER));
 
-            for (Attribute attribute : handleMultipleTypes(object.getAsJsonObject("items"), valueFieldName, name)) {
+            for (Attribute attribute : handleMultipleTypes(object.getAsJsonObject("items"), valueFieldName, name, relation)) {
                 JsonArray types = object.getAsJsonObject("items").getAsJsonArray("anyOf");
                 String path     = types.get(0).getAsJsonObject().get("path").getAsString();
 
@@ -90,7 +90,7 @@ public class Transformer {
         }
     }
 
-    private ArrayList<Attribute> handleMultipleTypes(JsonObject object, String prepend, String name) {
+    private ArrayList<Attribute> handleMultipleTypes(JsonObject object, String prepend, String name, Relation relation) {
         ArrayList<Attribute> attributes = new ArrayList<>();
 
         JsonArray types = object.getAsJsonArray("anyOf");
@@ -111,13 +111,13 @@ public class Transformer {
                 handleArrayRelations( name + arraySuffix, type );
             }
 
-            attributes.add( new Attribute( attributeName, attributeType ) );
+            attributes.add( new Attribute( uniqueAttributeName(relation, attributeName), attributeType ) );
         }
 
         return attributes;
     }
 
-    private Attribute handleSingleType(String attributeName, String propertyName, JsonObject property) {
+    private Attribute handleSingleType(String attributeName, String propertyName, JsonObject property, Relation relation) {
         int attributeType = TypeMapper.jsonToInt(property.get("type"));
 
         if (attributeType == TypeMapper.TYPE_OBJECT) {
@@ -129,7 +129,7 @@ public class Transformer {
             handleArrayRelations(propertyName, property);
         }
 
-        return new Attribute(attributeName, attributeType);
+        return new Attribute(uniqueAttributeName(relation, attributeName), attributeType);
     }
 
     private void loadConfig() {
@@ -182,7 +182,7 @@ public class Transformer {
             if (property.get("anyOf") != null) {
                 /** multiple type attribute **/
                 int i = 0;
-                for (Attribute attribute : handleMultipleTypes(property, attributeName, null)) {
+                for (Attribute attribute : handleMultipleTypes(property, attributeName, null, relation)) {
                     String path = property.getAsJsonArray("anyOf").get(i).getAsJsonObject().get("path").getAsString();
 
                     relation.addAttribtue(attribute);
@@ -193,13 +193,25 @@ public class Transformer {
 
             } else {
                 /** single type attribute **/
-                Attribute attribute = handleSingleType(attributeName, entry.getKey(), property);
+                Attribute attribute = handleSingleType(attributeName, entry.getKey(), property, relation);
                 relation.addAttribtue( attribute );
                 dataMapper.add( property.get("path").getAsString(), name, attribute );
             }
         }
 
         relations.add(relation);
+    }
+
+    private String uniqueAttributeName(Relation relation, String attributeName) {
+        int i = 0;
+        String append = "";
+
+        while (relation.hasAttribute(attributeName + append)) {
+            append = "_" + i;
+            i++;
+        }
+
+        return attributeName + append;
     }
 
     public void print() {
