@@ -47,6 +47,7 @@ public class Visualizer {
             desc            += "; Member occurrence: " + memberOcc + "/" + parentOcc + ", " + memRel + "%";
         }
         schema.append("description", desc);
+        schema.append("path", n.getPath());
 
         // node contains JsonObject
         if (propType.contains("JsonObject") || propType.contains("class com.google.gson.JsonObject")) {
