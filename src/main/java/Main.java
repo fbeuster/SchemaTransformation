@@ -1,6 +1,7 @@
 import com.google.gson.*;
 import schemaExtraction.Extraction;
 import schemaTransformation.capsules.Relation;
+import schemaTransformation.worker.DataMapper;
 import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
 import utils.Config;
@@ -59,6 +60,8 @@ public class Main {
             Optimizer optimizer = new Optimizer(transformer.getRelations());
             optimizer.run();
             optimizer.printResults();
+
+            System.out.println(transformer.getDataMapper());
         }
     }
 }

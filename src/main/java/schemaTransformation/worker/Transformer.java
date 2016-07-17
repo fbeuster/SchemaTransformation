@@ -19,6 +19,8 @@ public class Transformer {
 
     private Config config;
 
+    private DataMapper dataMapper;
+
     private JsonObject root;
 
     private String arraySuffix;
@@ -32,9 +34,14 @@ public class Transformer {
         this.config = config;
         this.name   = name;
         this.root   = object;
+        dataMapper  = new DataMapper();
         relations   = new ArrayList<>();
 
         loadConfig();
+    }
+
+    public DataMapper getDataMapper() {
+        return dataMapper;
     }
 
     public ArrayList<Relation> getRelations() {
@@ -45,12 +52,17 @@ public class Transformer {
         if (object.getAsJsonObject("items").get("anyOf") != null) {
             /** multiple type array **/
 
-            Relation relation = new Relation(name);
+            Relation relation = new Relation(name + arraySuffix);
             relation.addAttribtue(new Attribute(primaryKeyName, TypeMapper.TYPE_ID));
             relation.addAttribtue(new Attribute(orderFieldName, TypeMapper.TYPE_ORDER));
 
             for (Attribute attribute : handleMultipleTypes(object.getAsJsonObject("items"), valueFieldName, name)) {
                 relation.addAttribtue(attribute);
+                dataMapper.add(
+                        object.getAsJsonObject("items").getAsJsonArray("anyOf").get(0).getAsJsonObject().get("path").getAsString(),
+                        attribute.getType(),
+                        name + arraySuffix,
+                        attribute.getName());
             }
 
             relations.add(relation);
@@ -70,10 +82,10 @@ public class Transformer {
                         extra);
 
             } else if (TypeMapper.jsonToInt( elementType ) == TypeMapper.TYPE_ARRAY) {
-                makeArrayRelation( name + arraySuffix, object.getAsJsonObject("items") );
+                makeArrayRelation( name, object.getAsJsonObject("items") );
 
             } else {
-                makePrimitiveRelation(name + arraySuffix, elementType);
+                makePrimitiveRelation(name, elementType, object.getAsJsonObject("items").get("path").getAsString());
             }
         }
     }
@@ -114,23 +126,25 @@ public class Transformer {
     }
 
     private void makeArrayRelation(String name, JsonObject object) {
-        Relation relation = new Relation(name);
+        Relation relation = new Relation(name + arraySuffix);
         relation.addAttribtue(new Attribute(primaryKeyName, TypeMapper.TYPE_ID));
         relation.addAttribtue(new Attribute(orderFieldName, TypeMapper.TYPE_ORDER));
-        relation.addAttribtue(new Attribute(name + arraySuffix + primaryKeyName, TypeMapper.TYPE_ID));
+        relation.addAttribtue(new Attribute(name + arraySuffix + arraySuffix + primaryKeyName, TypeMapper.TYPE_ID));
+//        dataMapper.add(path + "." + name + "_value", name + arraySuffix, name + arraySuffix + arraySuffix + primaryKeyName);
 
-        handleArrayRelations(name, object);
+        handleArrayRelations(name + arraySuffix, object);
 
         relations.add(relation);
     }
 
-    private void makePrimitiveRelation(String name, JsonElement element) {
-        Relation relation = new Relation(name);
+    private void makePrimitiveRelation(String name, JsonElement element, String path) {
+        Relation relation = new Relation(name + arraySuffix);
         relation.addAttribtue(new Attribute(primaryKeyName, TypeMapper.TYPE_ID));
         relation.addAttribtue(new Attribute(orderFieldName, TypeMapper.TYPE_ORDER));
         relation.addAttribtue(new Attribute(valueFieldName, TypeMapper.jsonToInt(element)));
 
         relations.add(relation);
+        dataMapper.add(path, TypeMapper.jsonToInt(element), name + arraySuffix, valueFieldName);
     }
 
     private void makeRelation(String name, JsonObject object) {
@@ -162,12 +176,17 @@ public class Transformer {
                 int attributeType = TypeMapper.jsonToInt(property.get("type"));
 
                 if (attributeType == TypeMapper.TYPE_OBJECT) {
+                    dataMapper.add(property.get("path").getAsString(), attributeType, name, attributeName + primaryKeyName);
                     attributeName += primaryKeyName;
                     makeRelation(entry.getKey(), property.getAsJsonObject("properties"));
 
                 } else if (attributeType == TypeMapper.TYPE_ARRAY) {
+                    dataMapper.add(property.get("path").getAsString(), attributeType, name, attributeName + primaryKeyName);
                     attributeName += primaryKeyName;
                     handleArrayRelations(entry.getKey(), property);
+
+                } else {
+                    dataMapper.add(property.get("path").getAsString(), attributeType, name, attributeName);
                 }
 
                 Attribute attribute = new Attribute(attributeName, attributeType);
