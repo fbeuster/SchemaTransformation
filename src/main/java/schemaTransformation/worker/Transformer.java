@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import schemaTransformation.capsules.Attribute;
+import schemaTransformation.logs.DataMappingLog;
 import utils.Config;
 import schemaTransformation.capsules.Relation;
 
@@ -19,7 +20,7 @@ public class Transformer {
 
     private Config config;
 
-    private DataMapper dataMapper;
+    private DataMappingLog dataMapper;
 
     private JsonObject root;
 
@@ -34,13 +35,13 @@ public class Transformer {
         this.config = config;
         this.name   = name;
         this.root   = object;
-        dataMapper  = new DataMapper();
+        dataMapper  = new DataMappingLog();
         relations   = new ArrayList<>();
 
         loadConfig();
     }
 
-    public DataMapper getDataMapper() {
+    public DataMappingLog getDataMappingLog() {
         return dataMapper;
     }
 

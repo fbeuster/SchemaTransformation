@@ -1,19 +1,20 @@
-package schemaTransformation.worker;
+package schemaTransformation.logs;
 
 import schemaTransformation.capsules.Attribute;
 import schemaTransformation.capsules.DataMapKey;
+import schemaTransformation.worker.TypeMapper;
 
 import java.util.LinkedHashMap;
 
 /**
  * Created by Felix Beuster on 15.07.2016.
  */
-public class DataMapper {
+public class DataMappingLog {
 
     private LinkedHashMap<DataMapKey, Attribute> attributeMap;
     private LinkedHashMap<DataMapKey, String> relationMap;
 
-    public DataMapper() {
+    public DataMappingLog() {
         attributeMap    = new LinkedHashMap<>();
         relationMap     = new LinkedHashMap<>();
     }
