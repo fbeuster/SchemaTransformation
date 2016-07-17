@@ -60,9 +60,8 @@ public class Transformer {
                 relation.addAttribtue(attribute);
                 dataMapper.add(
                         object.getAsJsonObject("items").getAsJsonArray("anyOf").get(0).getAsJsonObject().get("path").getAsString(),
-                        attribute.getType(),
                         name + arraySuffix,
-                        attribute.getName());
+                        attribute);
             }
 
             relations.add(relation);
@@ -130,7 +129,6 @@ public class Transformer {
         relation.addAttribtue(new Attribute(primaryKeyName, TypeMapper.TYPE_ID));
         relation.addAttribtue(new Attribute(orderFieldName, TypeMapper.TYPE_ORDER));
         relation.addAttribtue(new Attribute(name + arraySuffix + arraySuffix + primaryKeyName, TypeMapper.TYPE_ID));
-//        dataMapper.add(path + "." + name + "_value", name + arraySuffix, name + arraySuffix + arraySuffix + primaryKeyName);
 
         handleArrayRelations(name + arraySuffix, object);
 
@@ -144,7 +142,7 @@ public class Transformer {
         relation.addAttribtue(new Attribute(valueFieldName, TypeMapper.jsonToInt(element)));
 
         relations.add(relation);
-        dataMapper.add(path, TypeMapper.jsonToInt(element), name + arraySuffix, valueFieldName);
+        dataMapper.add(path, name + arraySuffix, new Attribute(valueFieldName, TypeMapper.jsonToInt(element)));
     }
 
     private void makeRelation(String name, JsonObject object) {
@@ -176,21 +174,20 @@ public class Transformer {
                 int attributeType = TypeMapper.jsonToInt(property.get("type"));
 
                 if (attributeType == TypeMapper.TYPE_OBJECT) {
-                    dataMapper.add(property.get("path").getAsString(), attributeType, name, attributeName + primaryKeyName);
                     attributeName += primaryKeyName;
                     makeRelation(entry.getKey(), property.getAsJsonObject("properties"));
 
                 } else if (attributeType == TypeMapper.TYPE_ARRAY) {
-                    dataMapper.add(property.get("path").getAsString(), attributeType, name, attributeName + primaryKeyName);
                     attributeName += primaryKeyName;
                     handleArrayRelations(entry.getKey(), property);
 
                 } else {
-                    dataMapper.add(property.get("path").getAsString(), attributeType, name, attributeName);
                 }
 
                 Attribute attribute = new Attribute(attributeName, attributeType);
                 relation.addAttribtue(attribute);
+
+                dataMapper.add(property.get("path").getAsString(), name, attribute);
             }
         }
 

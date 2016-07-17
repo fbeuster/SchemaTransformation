@@ -1,5 +1,6 @@
 package schemaTransformation.worker;
 
+import schemaTransformation.capsules.Attribute;
 import schemaTransformation.capsules.DataMapKey;
 
 import java.util.LinkedHashMap;
@@ -9,7 +10,7 @@ import java.util.LinkedHashMap;
  */
 public class DataMapper {
 
-    private LinkedHashMap<DataMapKey, String> attributeMap;
+    private LinkedHashMap<DataMapKey, Attribute> attributeMap;
     private LinkedHashMap<DataMapKey, String> relationMap;
 
     public DataMapper() {
@@ -17,13 +18,13 @@ public class DataMapper {
         relationMap     = new LinkedHashMap<>();
     }
 
-    public void add(String source, int type, String relation, String attribute) {
-        DataMapKey key = new DataMapKey(source, type);
+    public void add(String source, String relation, Attribute attribute) {
+        DataMapKey key = new DataMapKey(source, attribute.getType());
         attributeMap.put(key, attribute);
         relationMap.put(key, relation);
     }
 
-    public String getAttributeName(String source, int type) {
+    public Attribute getAttribute(String source, int type) {
         DataMapKey key = new DataMapKey(source, type);
         return attributeMap.get(key);
     }
@@ -36,7 +37,7 @@ public class DataMapper {
     public String toString() {
         String ret = "";
         for(DataMapKey key : attributeMap.keySet()) {
-            ret += "map " + key.getPath() + "-" + TypeMapper.constantToString(key.getType()) + " to " + relationMap.get(key) + "-" + attributeMap.get(key) + "\n";
+            ret += "map " + key.getPath() + "-" + TypeMapper.constantToString(key.getType()) + " to " + relationMap.get(key) + "-" + attributeMap.get(key).getName() + "\n";
         }
         return ret;
     }
