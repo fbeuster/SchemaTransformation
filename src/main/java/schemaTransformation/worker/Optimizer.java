@@ -4,6 +4,7 @@ import schemaTransformation.capsules.Relation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.TreeSet;
 
 /**
@@ -11,7 +12,7 @@ import java.util.TreeSet;
  */
 public class Optimizer {
 
-    private ArrayList<Relation> relations;
+    private LinkedHashMap<String, Relation> relations;
 
     private static double DEFAULT_OMIT_THRESHHOLD = 20.0;
 
@@ -20,7 +21,7 @@ public class Optimizer {
     private TreeSet<String> fewAttribtues;
     private TreeSet<String> sameNames;
 
-    public Optimizer(ArrayList<Relation> relations) {
+    public Optimizer(LinkedHashMap<String, Relation> relations) {
         this.relations = relations;
 
         fewAttribtues = new TreeSet<>();
@@ -36,9 +37,9 @@ public class Optimizer {
     private void checkMerge() {
         HashSet<String> compare = new HashSet<>();
 
-        for (Relation r : relations) {
-            if (!compare.add(r.getName())) {
-                sameNames.add(r.getName());
+        for (String name : relations.keySet()) {
+            if (!compare.add(relations.get(name).getName())) {
+                sameNames.add(relations.get(name).getName());
             }
         }
 
@@ -63,9 +64,9 @@ public class Optimizer {
 
     public void run() {
         checkMerge();
-        for (Relation r : relations) {
-            checkInline(r);
-            checkMetrics(r);
+        for (String name : relations.keySet()) {
+            checkInline(relations.get(name));
+            checkMetrics(relations.get(name));
         }
     }
 }

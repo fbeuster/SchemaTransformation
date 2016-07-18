@@ -5,6 +5,9 @@ import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
 import utils.Config;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 
 public class Main {
     /** TODO
@@ -52,8 +55,9 @@ public class Main {
             transformer.run();
             transformer.print();
 
-            for (Relation relation : transformer.getRelations()) {
-                System.out.println(relation.toSQL(config));
+            LinkedHashMap<String, Relation> relations = transformer.getRelations();
+            for (String name : relations.keySet()) {
+                System.out.println(relations.get(name).toSQL(config));
             }
 
             Optimizer optimizer = new Optimizer(transformer.getRelations());
