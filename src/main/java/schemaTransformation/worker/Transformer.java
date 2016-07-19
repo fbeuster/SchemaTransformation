@@ -35,8 +35,8 @@ public class Transformer {
     private String primaryKeyName;
     private String valueFieldName;
 
-    public Transformer(String name, JsonObject object, Config config) {
-        this.config = config;
+    public Transformer(String name, JsonObject object) {
+        this.config = new Config();
         this.name   = name;
         this.root   = object;
         collisions  = new RelationCollisions();

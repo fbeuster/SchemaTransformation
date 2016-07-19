@@ -23,8 +23,8 @@ public class Extraction {
 
     private Storage storage;
 
-    public Extraction(Config config) {
-        this.config     = config;
+    public Extraction() {
+        this.config     = new Config();
         this.database   = config.getString("mongodb.database");
         this.collection = config.getString("mongodb.collection");
     }

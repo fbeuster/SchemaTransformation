@@ -20,9 +20,7 @@ public class Main {
      */
 
     public static void main(String[] args) {
-        Config config = new Config();
-
-        Extraction extraction = new Extraction(config);
+        Extraction extraction = new Extraction();
         extraction.run();
 
         JsonObject object = null;
@@ -48,13 +46,13 @@ public class Main {
         if (object != null) {
             JsonObject properties = object.get("properties").getAsJsonObject();
 
-            Transformer transformer = new Transformer(object.get("title").getAsString(), properties, config);
+            Transformer transformer = new Transformer(object.get("title").getAsString(), properties);
             transformer.run();
             transformer.print();
 
             LinkedHashMap<String, Relation> relations = transformer.getRelations();
             for (String name : relations.keySet()) {
-                System.out.println(relations.get(name).toSQL(config));
+                System.out.println(relations.get(name).toSQL( new Config() ));
             }
 
             Optimizer optimizer = new Optimizer(transformer.getRelations(), transformer.getCollisions());
