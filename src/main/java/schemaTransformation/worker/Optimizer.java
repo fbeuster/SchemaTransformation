@@ -2,9 +2,8 @@ package schemaTransformation.worker;
 
 import schemaTransformation.capsules.Relation;
 import schemaTransformation.logs.RelationCollisions;
+import utils.Config;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 
@@ -15,23 +14,23 @@ public class Optimizer {
 
     private LinkedHashMap<String, Relation> relations;
 
+    private Config config;
     private RelationCollisions collisions;
 
     private static double DEFAULT_OMIT_THRESHHOLD = 20.0;
-
-    private static int DEFAULT_ATTRIBUTE_THRESHHOLD = 3;
 
     private TreeSet<String> fewAttribtues;
 
     public Optimizer(LinkedHashMap<String, Relation> relations, RelationCollisions collisions) {
         this.collisions = collisions;
-        this.relations = relations;
+        this.relations  = relations;
 
-        fewAttribtues = new TreeSet<>();
+        config          = new Config();
+        fewAttribtues   = new TreeSet<>();
     }
 
     private void checkInline(Relation r) {
-        if (r.getAttributes().size() < DEFAULT_ATTRIBUTE_THRESHHOLD) {
+        if (r.getAttributes().size() <= config.getInt("optimization.inline.attribute_threshold")) {
             fewAttribtues.add(r.getName());
         }
     }

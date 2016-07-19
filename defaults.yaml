@@ -10,6 +10,9 @@ extraction:
     merge: false
     save_load: false
     simple_prop_types: false
+optimization:
+  inline:
+    attribute_threshold: 2
 transformation:
   fields:
     array_suffix: Array
