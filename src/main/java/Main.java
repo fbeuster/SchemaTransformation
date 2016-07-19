@@ -12,13 +12,10 @@ import java.util.LinkedHashMap;
 public class Main {
     /** TODO
      *  - keep track of any renamings
-     *  - before creating attributes, do name check
      *  - put 'anyOf' in a class constant
      *  - put path separator in a class constant
      *  - do name check before naming a node 'anyOf'
      *  - check property names for path separators
-     *  - relation names must me unique
-     *  - attribute mapping
      *  - relation tree?
      */
 
@@ -60,7 +57,7 @@ public class Main {
                 System.out.println(relations.get(name).toSQL(config));
             }
 
-            Optimizer optimizer = new Optimizer(transformer.getRelations());
+            Optimizer optimizer = new Optimizer(transformer.getRelations(), transformer.getCollisions());
             optimizer.run();
             optimizer.printResults();
 

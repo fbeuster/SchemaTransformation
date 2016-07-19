@@ -1,6 +1,7 @@
 package schemaTransformation.worker;
 
 import schemaTransformation.capsules.Relation;
+import schemaTransformation.logs.RelationCollisions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,18 +15,19 @@ public class Optimizer {
 
     private LinkedHashMap<String, Relation> relations;
 
+    private RelationCollisions collisions;
+
     private static double DEFAULT_OMIT_THRESHHOLD = 20.0;
 
     private static int DEFAULT_ATTRIBUTE_THRESHHOLD = 3;
 
     private TreeSet<String> fewAttribtues;
-    private TreeSet<String> sameNames;
 
-    public Optimizer(LinkedHashMap<String, Relation> relations) {
+    public Optimizer(LinkedHashMap<String, Relation> relations, RelationCollisions collisions) {
+        this.collisions = collisions;
         this.relations = relations;
 
         fewAttribtues = new TreeSet<>();
-        sameNames = new TreeSet<>();
     }
 
     private void checkInline(Relation r) {
@@ -35,15 +37,6 @@ public class Optimizer {
     }
 
     private void checkMerge() {
-        HashSet<String> compare = new HashSet<>();
-
-        for (String name : relations.keySet()) {
-            if (!compare.add(relations.get(name).getName())) {
-                sameNames.add(relations.get(name).getName());
-            }
-        }
-
-        compare.clear();
     }
 
     private void checkMetrics(Relation r) {
@@ -58,7 +51,7 @@ public class Optimizer {
         int numberFewAttributes = fewAttribtues.size();
         System.out.println(numberFewAttributes + " tables are below the attribute threshold");
 
-        int numberSameNames = sameNames.size();
+        int numberSameNames = collisions.size();
         System.out.println(numberSameNames + " tables have the same name");
     }
 

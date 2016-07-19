@@ -60,6 +60,7 @@ public class Extraction {
 
         Calendar startExtraction = Calendar.getInstance();
         se.extractAll();
+//        se.extractTest("{\"report\" : {\"ID\" : 1} }");
         Calendar endExtraction = Calendar.getInstance();
         se.close();
     }

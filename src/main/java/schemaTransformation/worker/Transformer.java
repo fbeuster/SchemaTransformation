@@ -5,11 +5,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import schemaTransformation.capsules.Attribute;
 import schemaTransformation.logs.DataMappingLog;
+import schemaTransformation.logs.RelationCollisions;
 import utils.Config;
 import schemaTransformation.capsules.Relation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -26,6 +26,8 @@ public class Transformer {
 
     private JsonObject root;
 
+    private RelationCollisions collisions;
+
     private String arraySuffix;
     private String name;
     private String objectSuffix;
@@ -37,6 +39,7 @@ public class Transformer {
         this.config = config;
         this.name   = name;
         this.root   = object;
+        collisions  = new RelationCollisions();
         dataMapper  = new DataMappingLog();
         relations   = new LinkedHashMap<>();
 
@@ -46,6 +49,8 @@ public class Transformer {
     public DataMappingLog getDataMappingLog() {
         return dataMapper;
     }
+
+    public RelationCollisions getCollisions() { return collisions; }
 
     public LinkedHashMap<String, Relation> getRelations() {
         return relations;
@@ -234,6 +239,10 @@ public class Transformer {
         while (relations.get(name + append) != null) {
             append = "_" + i;
             i++;
+        }
+
+        if (!append.equals("")) {
+            collisions.add(name, name + append);
         }
 
         return name + append;
