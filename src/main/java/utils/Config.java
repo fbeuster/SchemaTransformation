@@ -27,7 +27,7 @@ public class Config {
         }
 
         try {
-            InputStream io = new FileInputStream(new File("defautls.yaml"));
+            InputStream io = new FileInputStream(new File("defaults.yaml"));
             Yaml yaml = new Yaml();
             defaults = (HashMap) yaml.load(io);
 
@@ -85,6 +85,11 @@ public class Config {
         }
 
         return value;
+    }
+
+    public int getInt(String key) {
+        Object r;
+        return (r = get(key)) == null ? null : (int) r;
     }
 
     public String getString(String key) {
