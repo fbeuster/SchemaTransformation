@@ -60,7 +60,13 @@ public class Relation {
         ret += "Relation " + name + "\n";
 
         for (Attribute attribute : attributes) {
-            ret += "- " + attribute.getName() + " : " + TypeMapper.constantToString(attribute.getType()) + "\n";
+            ret += "- " + attribute.getName() + " : " + TypeMapper.constantToString(attribute.getType());
+
+            if (attribute.getType() == TypeMapper.TYPE_ARRAY || attribute.getType() == TypeMapper.TYPE_OBJECT) {
+                ret += " (" + attribute.getForeignRelationName() + ")";
+            }
+
+            ret += "\n";
         }
 
         return ret;

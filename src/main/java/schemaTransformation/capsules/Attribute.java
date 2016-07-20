@@ -10,6 +10,7 @@ public class Attribute {
     private int type;
 
     private String name;
+    private String foreignRelationName = null;
 
     public Attribute(String name, int type) {
         this.name = name;
@@ -22,6 +23,14 @@ public class Attribute {
 
     public String getName() {
         return name;
+    }
+
+    public String getForeignRelationName() {
+        return foreignRelationName;
+    }
+
+    public void setForeignRelationName(String name) {
+        foreignRelationName = name;
     }
 
     public String toSQL() {

@@ -47,8 +47,10 @@ public class Main {
             JsonObject properties = object.get("properties").getAsJsonObject();
 
             Transformer transformer = new Transformer(object.get("title").getAsString(), properties);
-            transformer.run();
+            String rootRelation = transformer.run();
             transformer.print();
+
+            System.out.println("root relation: " + rootRelation + "\n");
 
             LinkedHashMap<String, Relation> relations = transformer.getRelations();
             for (String name : relations.keySet()) {
