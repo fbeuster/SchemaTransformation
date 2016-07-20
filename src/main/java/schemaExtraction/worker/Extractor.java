@@ -36,6 +36,7 @@ public class Extractor {
 
     private String collection;
     private String database;
+    private String separator;
 
     public Extractor(Extraction main, Config config) {
         this.main   = main;
@@ -43,6 +44,7 @@ public class Extractor {
 
         database   = config.getString("mongodb.database");
         collection = config.getString("mongodb.collection");
+        separator  = config.getString("json.path_separator");
 
         mc      = new MongoClient();
         mdb     = mc.getDatabase(database);
@@ -95,13 +97,13 @@ public class Extractor {
     private void extractFromJsonDocument(JsonElement node, String nodeName, String parentName, String docId, int level, String path) {
         String propType = getJsonType(node);
 
-        storeNode(nodeName, propType, docId, level, path + "/" + nodeName);
+        storeNode(nodeName, propType, docId, level, path + separator + nodeName);
 
         if (parentName != "" && parentName != collection) {
-            storeEdge(nodeName, parentName, docId, level, path + "/" + nodeName, path);
+            storeEdge(nodeName, parentName, docId, level, path + separator + nodeName, path);
         }
 
-        path = path + "/" + nodeName;
+        path = path + separator + nodeName;
 
         if (node.isJsonObject()) {
             for (Map.Entry<String, JsonElement> it : node.getAsJsonObject().entrySet()) {
