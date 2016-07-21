@@ -34,7 +34,7 @@ public class DataMover {
      *
      */
 
-    private ArrayList<String> insertStatements;
+    private ArrayList<String> statements;
 
     private Config config;
 
@@ -52,10 +52,10 @@ public class DataMover {
         this.dataMapping    = dataMapping;
         this.relations      = relations;
 
-        config              = new Config();
-        insertStatements    = new ArrayList<>();
-        parser              = new JsonParser();
-        separator           = config.getString("json.path_separator");
+        config      = new Config();
+        statements  = new ArrayList<>();
+        parser      = new JsonParser();
+        separator   = config.getString("json.path_separator");
 
         MongoClient mc      = new MongoClient();
         MongoDatabase mdb   = mc.getDatabase( config.getString("mongodb.database") );
@@ -75,7 +75,7 @@ public class DataMover {
         fields = "(" + fields.substring(0, fields.length() - 2) + ") ";
         values = "VALUES (" + values.substring(0, values.length() - 2) + ");";
 
-        insertStatements.add(relation + fields + values);
+        statements.add(relation + fields + values);
     }
 
     private void parseMultiArray(JsonArray array, String path) {
@@ -90,10 +90,13 @@ public class DataMover {
                 order++;
 
                 if (element.isJsonObject()) {
+                    Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf", Types.TYPE_OBJECT);
                     parseObject(
                             element.getAsJsonObject(),
                             path + separator + "anyOf");
-                    attributes.put("value_object", "__ID");
+
+                    saveLastInsertID(attribute.getForeignRelationName());
+                    attributes.put("value_object", "@last_insert_" + attribute.getForeignRelationName());
 
                 } else if (element.isJsonArray()) {
                     Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf", Types.TYPE_ARRAY);
@@ -101,7 +104,9 @@ public class DataMover {
                             attribute.getForeignRelationName(),
                             element.getAsJsonArray(),
                             path + separator + "anyOf");
-                    attributes.put("value_array", "__ID");
+
+                    saveLastInsertID(attribute.getForeignRelationName());
+                    attributes.put("value_array", "@last_insert_" + attribute.getForeignRelationName());
 
                 } else {
                     int type = Types.jsonElementToInt(element);
@@ -128,16 +133,13 @@ public class DataMover {
                 if (element.isJsonObject()) {
                     for (Map.Entry<String, JsonElement> property : element.getAsJsonObject().entrySet()) {
                         if (property.getValue().isJsonObject()) {
-                            parseObject(property.getValue().getAsJsonObject(), path + separator + "anyOf" + separator + property.getKey());
-                            /**
-                             * TODO
-                             * @nested_id = SELECT LAST_INSERT_ID()
-                             *
-                             * if insert fails, LAST_INSERT_ID undefined
-                             */
+                            Attribute attribute = dataMapping.getAttribute( path + separator + "anyOf" + separator + property.getKey(), Types.TYPE_OBJECT);
+                            parseObject(
+                                    property.getValue().getAsJsonObject(),
+                                    path + separator + "anyOf" + separator + property.getKey());
 
-                            //
-                            attributes.put(property.getKey(), "__ID");
+                            saveLastInsertID(attribute.getForeignRelationName());
+                            attributes.put(property.getKey(), "@last_insert_" + attribute.getForeignRelationName());
 
                         } else if (property.getValue().isJsonArray()) {
                             Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf" + separator + property.getKey(), Types.jsonElementToInt(property.getValue()));
@@ -145,7 +147,9 @@ public class DataMover {
                                     attribute.getForeignRelationName(),
                                     property.getValue().getAsJsonArray(),
                                     path + separator + "anyOf");
-                            attributes.put(property.getKey(), "__ID");
+
+                            saveLastInsertID(attribute.getForeignRelationName());
+                            attributes.put(property.getKey(), "@last_insert_" + attribute.getForeignRelationName());
 
                         } else if (property.getValue().isJsonPrimitive()) {
                             attributes.put(property.getKey(), property.getValue());
@@ -163,7 +167,9 @@ public class DataMover {
                                     element.getAsJsonArray(),
                                     path + separator + "anyOf");
                         }
-                        attributes.put(attribute.getName(), "__ID");
+
+                        saveLastInsertID(attribute.getForeignRelationName());
+                        attributes.put(attribute.getName(), "@last_insert_" + attribute.getForeignRelationName());
                     }
 
                 } else {
@@ -190,14 +196,18 @@ public class DataMover {
 
             if (attribute.getType() == Types.TYPE_OBJECT) {
                 parseObject(property.getValue().getAsJsonObject(), path + separator + property.getKey());
-                attributes.put(attribute.getName(), "__ID");
+
+                saveLastInsertID(attribute.getForeignRelationName());
+                attributes.put(attribute.getName(), "@last_insert_" + attribute.getForeignRelationName());
 
             } else if (attribute.getType() == Types.TYPE_ARRAY) {
                 parseSubArray(
                         attribute.getForeignRelationName(),
                         property.getValue().getAsJsonArray(),
                         path + separator + property.getKey());
-                attributes.put(attribute.getName(), "__ID");
+
+                saveLastInsertID(attribute.getForeignRelationName());
+                attributes.put(attribute.getName(), "@last_insert_" + attribute.getForeignRelationName());
 
             } else {
                 attributes.put(attribute.getName(), property.getValue());
@@ -225,7 +235,7 @@ public class DataMover {
         System.out.println("DECLARE EXIT HANDLER FOR SQLEXCEPTION ROLLBACK;");
         System.out.println("START TRANSACTION;");
 
-        for (String insert : insertStatements) {
+        for (String insert : statements) {
             System.out.println(insert);
         }
 
@@ -233,8 +243,6 @@ public class DataMover {
     }
 
     public void run() {
-        System.out.println(dataMapping);
-
         if (false) {
             String element = "{\"test\":[{\"data\" : {\"cool\" : 4}}]}";
             parseObject(parser.parse(element).getAsJsonObject(), separator + config.getString("mongodb.collection"));
@@ -252,5 +260,9 @@ public class DataMover {
                 break;
             }
         }
+    }
+
+    private void saveLastInsertID(String relationName) {
+        statements.add("SET @last_insert_" + relationName + " = LAST_INSERT_ID();");
     }
 }

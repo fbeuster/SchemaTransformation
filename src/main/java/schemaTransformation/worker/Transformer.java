@@ -239,7 +239,6 @@ public class Transformer {
                 /** single type attribute **/
                 Attribute attribute = handleSingleType(attributeName, entry.getKey(), property, relation);
                 relation.addAttribtue( attribute );
-                System.out.println(attribute.getName());
                 dataMapper.add( property.get("path").getAsString(), relationName, attribute );
             }
         }

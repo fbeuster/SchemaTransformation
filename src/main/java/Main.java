@@ -1,8 +1,12 @@
 import com.google.gson.*;
 import schemaExtraction.Extraction;
+import schemaTransformation.capsules.Relation;
 import schemaTransformation.worker.DataMover;
 import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
+import utils.Config;
+
+import java.util.Map;
 
 
 public class Main {
@@ -50,6 +54,10 @@ public class Main {
             Transformer transformer = new Transformer(object.get("title").getAsString(), properties);
             transformer.run();
             transformer.print();
+
+            for (Map.Entry<String, Relation> entry : transformer.getRelations().entrySet()) {
+                System.out.println(entry.getValue().toSQL(new Config()));
+            }
 
             System.out.println("+++ start optimization +++");
 
