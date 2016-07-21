@@ -1,11 +1,12 @@
-package schemaTransformation.worker;
+package utils;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 /**
  * Created by Felix Beuster on 03.07.2016.
  */
-public class TypeMapper {
+public class Types {
 
     public static int TYPE_ARRAY    = 0;
     public static int TYPE_BOOL     = 1;
@@ -55,6 +56,59 @@ public class TypeMapper {
         } else if ( type == TYPE_ORDER  ) { return STRING_ORDER;
         } else if ( type == TYPE_STRING ) { return STRING_STRING;
         } else {                            return STRING_NULL;
+        }
+    }
+
+    public static int jsonElementToInt(JsonElement e) {
+        if (e.isJsonObject()) {         return TYPE_OBJECT;
+        } else if (e.isJsonArray()) {   return TYPE_ARRAY;
+        } else if (e.isJsonNull()) {    return TYPE_NULL;
+        } else {
+            JsonPrimitive p = e.getAsJsonPrimitive();
+
+            if (p.isString()) {         return TYPE_STRING;
+            } else if (p.isNumber()) {  return TYPE_NUMBER;
+            } else if (p.isBoolean()) { return TYPE_BOOL;
+            } else {                    return TYPE_NULL;
+            }
+        }
+    }
+
+    public static String jsonElementToJsonString(JsonElement e) {
+        Config config = new Config();
+
+        if (config.getBoolean("extraction.features.simple_prop_types")) {
+            // method body for simple property types
+            if (e.isJsonObject()) {         return "JsonObject";
+            } else if (e.isJsonArray()) {   return "JsonArray";
+            } else if (e.isJsonNull()) {    return "JsonNull";
+
+            } else {
+                JsonPrimitive p = e.getAsJsonPrimitive();
+
+                if (p.isString()) {         return "class com.google.gson.JsonPrimitive.String";
+                } else if (p.isNumber()) {  return "class com.google.gson.JsonPrimitive.Number";
+                } else if (p.isBoolean()) { return "class com.google.gson.JsonPrimitive.Boolean";
+                } else if (p.isJsonNull()) {return "class com.google.gson.JsonPrimitive.JsonNull";
+                } else {                    return null;
+                }
+            }
+
+        } else {
+            // alternative method body for exact property types
+            if(!e.isJsonPrimitive()) {
+                return e.getClass().toString();
+
+            } else {
+                JsonPrimitive p = e.getAsJsonPrimitive();
+
+                if (p.isString()) {         return "class com.google.gson.JsonPrimitive.String";
+                } else if (p.isNumber()) {  return "class com.google.gson.JsonPrimitive.Number";
+                } else if (p.isBoolean()) { return "class com.google.gson.JsonPrimitive.Boolean";
+                } else if (p.isJsonNull()) {return "class com.google.gson.JsonPrimitive.JsonNull";
+                } else {                    return null;
+                }
+            }
         }
     }
 

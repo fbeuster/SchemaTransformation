@@ -11,6 +11,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import schemaExtraction.Extraction;
 import utils.Config;
+import utils.Types;
 
 import java.util.*;
 
@@ -95,7 +96,7 @@ public class Extractor {
     }
 
     private void extractFromJsonDocument(JsonElement node, String nodeName, String parentName, String docId, int level, String path) {
-        String propType = getJsonType(node);
+        String propType = Types.jsonElementToJsonString(node);
 
         storeNode(nodeName, propType, docId, level, path + separator + nodeName);
 
@@ -122,7 +123,7 @@ public class Extractor {
             while (iterator.hasNext()) {
                 JsonElement element = iterator.next();
 
-                String elementType = getJsonType(element);
+                String elementType = Types.jsonElementToJsonString(element);
                 if (currentType.equalsIgnoreCase(elementType)) {
                     typeCount++;
 
@@ -170,42 +171,6 @@ public class Extractor {
 
                 System.out.println(String.format("%d cycles were completed after %d seconds. %d nodes and %d edges are extracted so far.",
                         cycles, seconds, main.getStorage().countNodes(), main.getStorage().countEdges()));
-            }
-        }
-    }
-
-    private String getJsonType(JsonElement e) {
-        if (config.getBoolean("extraction.features.simple_prop_types")) {
-            // method body for simple property types
-            if (e.isJsonObject()) {         return "JsonObject";
-            } else if (e.isJsonArray()) {   return "JsonArray";
-            } else if (e.isJsonNull()) {    return "JsonNull";
-
-            } else {
-                JsonPrimitive p = e.getAsJsonPrimitive();
-
-                if (p.isString()) {         return "class com.google.gson.JsonPrimitive.String";
-                } else if (p.isNumber()) {  return "class com.google.gson.JsonPrimitive.Number";
-                } else if (p.isBoolean()) { return "class com.google.gson.JsonPrimitive.Boolean";
-                } else if (p.isJsonNull()) {return "class com.google.gson.JsonPrimitive.JsonNull";
-                } else {                    return null;
-                }
-            }
-
-        } else {
-            // alternative method body for exact property types
-            if(e.isJsonPrimitive() == false) {
-                return e.getClass().toString();
-
-            } else {
-                JsonPrimitive p = e.getAsJsonPrimitive();
-
-                if (p.isString()) {         return "class com.google.gson.JsonPrimitive.String";
-                } else if (p.isNumber()) {  return "class com.google.gson.JsonPrimitive.Number";
-                } else if (p.isBoolean()) { return "class com.google.gson.JsonPrimitive.Boolean";
-                } else if (p.isJsonNull()) {return "class com.google.gson.JsonPrimitive.JsonNull";
-                } else {                    return null;
-                }
             }
         }
     }

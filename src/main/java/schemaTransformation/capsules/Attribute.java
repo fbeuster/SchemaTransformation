@@ -1,6 +1,6 @@
 package schemaTransformation.capsules;
 
-import schemaTransformation.worker.TypeMapper;
+import utils.Types;
 
 /**
  * Created by Felix Beuster on 03.07.2016.
@@ -34,15 +34,15 @@ public class Attribute {
     }
 
     public String toSQL() {
-        if ( type == TypeMapper.TYPE_ID ) {
-            return "`" + name + "` " + TypeMapper.constantToSQL(type) + " NOT NULL AUTO_INCREMENT";
+        if ( type == Types.TYPE_ID ) {
+            return "`" + name + "` " + Types.constantToSQL(type) + " NOT NULL AUTO_INCREMENT";
 
-        } else if ( type == TypeMapper.TYPE_ARRAY || type == TypeMapper.TYPE_ID ||
-                type == TypeMapper.TYPE_ORDER || type == TypeMapper.TYPE_OBJECT ) {
-            return "`" + name + "` " + TypeMapper.constantToSQL(type) + " NOT NULL";
+        } else if ( type == Types.TYPE_ARRAY || type == Types.TYPE_ID ||
+                type == Types.TYPE_ORDER || type == Types.TYPE_OBJECT ) {
+            return "`" + name + "` " + Types.constantToSQL(type) + " NOT NULL";
 
         } else  {
-            return "`" + name + "` " + TypeMapper.constantToSQL(type) + " NULL";
+            return "`" + name + "` " + Types.constantToSQL(type) + " NULL";
         }
     }
 }

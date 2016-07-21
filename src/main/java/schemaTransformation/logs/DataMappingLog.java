@@ -2,7 +2,7 @@ package schemaTransformation.logs;
 
 import schemaTransformation.capsules.Attribute;
 import schemaTransformation.capsules.DataMapKey;
-import schemaTransformation.worker.TypeMapper;
+import utils.Types;
 
 import java.util.LinkedHashMap;
 
@@ -38,7 +38,7 @@ public class DataMappingLog {
     public String toString() {
         String ret = "";
         for(DataMapKey key : attributeMap.keySet()) {
-            ret += "map " + key.getPath() + "-" + TypeMapper.constantToString(key.getType()) + " to " + relationMap.get(key) + "-" + attributeMap.get(key).getName() + "\n";
+            ret += "map " + key.getPath() + "-" + Types.constantToString(key.getType()) + " to " + relationMap.get(key) + "-" + attributeMap.get(key).getName() + "\n";
         }
         return ret;
     }

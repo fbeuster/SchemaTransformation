@@ -1,6 +1,6 @@
 package schemaTransformation.capsules;
 
-import schemaTransformation.worker.TypeMapper;
+import utils.Types;
 import utils.Config;
 
 import java.util.ArrayList;
@@ -69,9 +69,9 @@ public class Relation {
         ret += "Relation " + name + "\n";
 
         for (Attribute attribute : attributes) {
-            ret += "- " + attribute.getName() + " : " + TypeMapper.constantToString(attribute.getType());
+            ret += "- " + attribute.getName() + " : " + Types.constantToString(attribute.getType());
 
-            if (attribute.getType() == TypeMapper.TYPE_ARRAY || attribute.getType() == TypeMapper.TYPE_OBJECT) {
+            if (attribute.getType() == Types.TYPE_ARRAY || attribute.getType() == Types.TYPE_OBJECT) {
                 ret += " (" + attribute.getForeignRelationName() + ")";
             }
 
