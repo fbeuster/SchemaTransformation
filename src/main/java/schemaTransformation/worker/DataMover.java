@@ -78,6 +78,42 @@ public class DataMover {
         insertStatements.add(relation + fields + values);
     }
 
+    private String getJsonType(JsonElement e) {
+        if (config.getBoolean("extraction.features.simple_prop_types")) {
+            // method body for simple property types
+            if (e.isJsonObject()) {         return "JsonObject";
+            } else if (e.isJsonArray()) {   return "JsonArray";
+            } else if (e.isJsonNull()) {    return "JsonNull";
+
+            } else {
+                JsonPrimitive p = e.getAsJsonPrimitive();
+
+                if (p.isString()) {         return "class com.google.gson.JsonPrimitive.String";
+                } else if (p.isNumber()) {  return "class com.google.gson.JsonPrimitive.Number";
+                } else if (p.isBoolean()) { return "class com.google.gson.JsonPrimitive.Boolean";
+                } else if (p.isJsonNull()) {return "class com.google.gson.JsonPrimitive.JsonNull";
+                } else {                    return null;
+                }
+            }
+
+        } else {
+            // alternative method body for exact property types
+            if(!e.isJsonPrimitive()) {
+                return e.getClass().toString();
+
+            } else {
+                JsonPrimitive p = e.getAsJsonPrimitive();
+
+                if (p.isString()) {         return "class com.google.gson.JsonPrimitive.String";
+                } else if (p.isNumber()) {  return "class com.google.gson.JsonPrimitive.Number";
+                } else if (p.isBoolean()) { return "class com.google.gson.JsonPrimitive.Boolean";
+                } else if (p.isJsonNull()) {return "class com.google.gson.JsonPrimitive.JsonNull";
+                } else {                    return null;
+                }
+            }
+        }
+    }
+
     private void parseMultiArray(JsonArray array, String path) {
         if (array.size() > 0) {
             String relationName = dataMapping.getAttribute(path, TypeMapper.TYPE_ARRAY).getForeignRelationName();
@@ -209,6 +245,12 @@ public class DataMover {
         }
     }
 
+    public void print() {
+        for (String insert : insertStatements) {
+            System.out.println(insert);
+        }
+    }
+
     public void run() {
         System.out.println(dataMapping);
 
@@ -227,48 +269,6 @@ public class DataMover {
                 System.out.println(parser.parse(doc.toJson()));
                 parseObject(parser.parse(doc.toJson()).getAsJsonObject(), separator + config.getString("mongodb.collection"));
                 break;
-            }
-        }
-    }
-
-    public void print() {
-        for (String insert : insertStatements) {
-            System.out.println(insert);
-        }
-    }
-
-    private String getJsonType(JsonElement e) {
-        if (config.getBoolean("extraction.features.simple_prop_types")) {
-            // method body for simple property types
-            if (e.isJsonObject()) {         return "JsonObject";
-            } else if (e.isJsonArray()) {   return "JsonArray";
-            } else if (e.isJsonNull()) {    return "JsonNull";
-
-            } else {
-                JsonPrimitive p = e.getAsJsonPrimitive();
-
-                if (p.isString()) {         return "class com.google.gson.JsonPrimitive.String";
-                } else if (p.isNumber()) {  return "class com.google.gson.JsonPrimitive.Number";
-                } else if (p.isBoolean()) { return "class com.google.gson.JsonPrimitive.Boolean";
-                } else if (p.isJsonNull()) {return "class com.google.gson.JsonPrimitive.JsonNull";
-                } else {                    return null;
-                }
-            }
-
-        } else {
-            // alternative method body for exact property types
-            if(!e.isJsonPrimitive()) {
-                return e.getClass().toString();
-
-            } else {
-                JsonPrimitive p = e.getAsJsonPrimitive();
-
-                if (p.isString()) {         return "class com.google.gson.JsonPrimitive.String";
-                } else if (p.isNumber()) {  return "class com.google.gson.JsonPrimitive.Number";
-                } else if (p.isBoolean()) { return "class com.google.gson.JsonPrimitive.Boolean";
-                } else if (p.isJsonNull()) {return "class com.google.gson.JsonPrimitive.JsonNull";
-                } else {                    return null;
-                }
             }
         }
     }
