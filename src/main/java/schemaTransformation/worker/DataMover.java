@@ -73,7 +73,7 @@ public class DataMover {
 
         String relation = "INSERT INTO " + relationName;
         fields = "(" + fields.substring(0, fields.length() - 2) + ") ";
-        values = "VALUES (" + values.substring(0, values.length() - 2) + ")";
+        values = "VALUES (" + values.substring(0, values.length() - 2) + ");";
 
         insertStatements.add(relation + fields + values);
     }
@@ -129,6 +129,14 @@ public class DataMover {
                     for (Map.Entry<String, JsonElement> property : element.getAsJsonObject().entrySet()) {
                         if (property.getValue().isJsonObject()) {
                             parseObject(property.getValue().getAsJsonObject(), path + separator + "anyOf" + separator + property.getKey());
+                            /**
+                             * TODO
+                             * @nested_id = SELECT LAST_INSERT_ID()
+                             *
+                             * if insert fails, LAST_INSERT_ID undefined
+                             */
+
+                            //
                             attributes.put(property.getKey(), "__ID");
 
                         } else if (property.getValue().isJsonArray()) {
@@ -210,9 +218,18 @@ public class DataMover {
     }
 
     public void print() {
+        /**
+         * failing when
+         *  - null in not null
+         */
+        System.out.println("DECLARE EXIT HANDLER FOR SQLEXCEPTION ROLLBACK;");
+        System.out.println("START TRANSACTION;");
+
         for (String insert : insertStatements) {
             System.out.println(insert);
         }
+
+        System.out.println("COMMIT;");
     }
 
     public void run() {
