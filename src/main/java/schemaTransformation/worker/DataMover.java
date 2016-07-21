@@ -11,6 +11,7 @@ import schemaTransformation.logs.DataMappingLog;
 import utils.Config;
 
 import java.util.*;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * Created by Felix Beuster on 20.07.2016.
@@ -51,64 +52,91 @@ public class DataMover {
         this.dataMapping    = dataMapping;
         this.relations      = relations;
 
-        config      = new Config();
-        insertStatements = new ArrayList<>();
-        parser      = new JsonParser();
-        separator   = config.getString("json.path_separator");
+        config              = new Config();
+        insertStatements    = new ArrayList<>();
+        parser              = new JsonParser();
+        separator           = config.getString("json.path_separator");
 
         MongoClient mc      = new MongoClient();
         MongoDatabase mdb   = mc.getDatabase( config.getString("mongodb.database") );
         docs                = mdb.getCollection( config.getString("mongodb.collection") );
     }
 
-    private void parseSingleArray(JsonArray array, String path) {
+    private void buildInsertStatement(String relationName, LinkedHashMap<String, Object> attributes) {
+        String fields = "";
+        String values = "";
+
+        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+            fields += "`" + attribute.getKey() + "`" + ", ";
+            values += attribute.getValue() + ", ";
+        }
+
+        String relation = "INSERT INTO " + relationName;
+        fields = "(" + fields.substring(0, fields.length() - 2) + ") ";
+        values = "VALUES (" + values.substring(0, values.length() - 2) + ")";
+
+        insertStatements.add(relation + fields + values);
+    }
+
+    private void parseMultiArray(JsonArray array, String path) {
         if (array.size() > 0) {
-
-            String relationName = "";
-
-            /** collect fields **/
-
-            JsonElement first = array.get(0);
-            if (first.isJsonObject()) {
-                relationName = dataMapping.getAttribute(path, TypeMapper.TYPE_ARRAY).getForeignRelationName();
-
-            } else if (first.isJsonArray()) {
-                relationName = dataMapping.getAttribute(path, TypeMapper.TYPE_ARRAY).getForeignRelationName();
-
-            } else if (first.isJsonPrimitive()) {
-                relationName = dataMapping.getRelationName(path + separator + "anyOf", TypeMapper.jsonStringToInt(getJsonType(first)));
-
-            }
+            String relationName = dataMapping.getAttribute(path, TypeMapper.TYPE_ARRAY).getForeignRelationName();
 
             /** iterate and parse array items **/
-
             int order = 0;
             for (JsonElement element : array) {
                 LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-                attributes.put("ID", "__ID");
                 attributes.put("order", order);
                 order++;
 
                 if (element.isJsonObject()) {
-                    for (Map.Entry<String, JsonElement> property : first.getAsJsonObject().entrySet()) {
+                    parseObject(
+                            element.getAsJsonObject(),
+                            path + separator + "anyOf");
+                    attributes.put("value_object", "__ID");
+
+                } else if (element.isJsonArray()) {
+                    Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf", TypeMapper.TYPE_ARRAY);
+                    parseSubArray(
+                            attribute.getForeignRelationName(),
+                            element.getAsJsonArray(),
+                            path + separator + "anyOf");
+                    attributes.put("value_array", "__ID");
+
+                } else {
+                    int type = TypeMapper.jsonStringToInt(getJsonType(element));
+                    attributes.put("value_" + TypeMapper.constantToString(type), element);
+                }
+
+                /** build insert statement **/
+                buildInsertStatement(relationName, attributes);
+            }
+        }
+    }
+
+    private void parseSingleArray(JsonArray array, String path) {
+        if (array.size() > 0) {
+            String relationName = dataMapping.getAttribute(path, TypeMapper.TYPE_ARRAY).getForeignRelationName();
+
+            /** iterate and parse array items **/
+            int order = 0;
+            for (JsonElement element : array) {
+                LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
+                attributes.put("order", order);
+                order++;
+
+                if (element.isJsonObject()) {
+                    for (Map.Entry<String, JsonElement> property : element.getAsJsonObject().entrySet()) {
                         if (property.getValue().isJsonObject()) {
                             parseObject(property.getValue().getAsJsonObject(), path + separator + "anyOf" + separator + property.getKey());
                             attributes.put(property.getKey(), "__ID");
 
                         } else if (property.getValue().isJsonArray()) {
                             Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf" + separator + property.getKey(), TypeMapper.jsonStringToInt(getJsonType(property.getValue())));
-                            String foreignName = attribute.getForeignRelationName();
-                            Relation relation = relations.get(foreignName);
-
-                            if (relation.isMultiArray()) {
-                                parseMultiArray(
-                                        property.getValue().getAsJsonArray(),
-                                        path + separator + "anyOf");
-                            } else {
-                                parseSingleArray(
-                                        property.getValue().getAsJsonArray(),
-                                        path + separator + "anyOf");
-                            }
+                            parseSubArray(
+                                    attribute.getForeignRelationName(),
+                                    property.getValue().getAsJsonArray(),
+                                    path + separator + "anyOf");
                             attributes.put(property.getKey(), "__ID");
 
                         } else if (property.getValue().isJsonPrimitive()) {
@@ -122,169 +150,63 @@ public class DataMover {
 
                     for (Attribute attribute : relation.getAttributes()) {
                         if (!attribute.getName().equals("ID") && !attribute.getName().equals("order")) {
-                            String foreignName = attribute.getForeignRelationName();
-                            Relation foreignRelation = relations.get(foreignName);
-
-                            if (foreignRelation.isMultiArray()) {
-                                parseMultiArray(
-                                        element.getAsJsonArray(),
-                                        path + separator + "anyOf");
-                            } else {
-                                parseSingleArray(
-                                        element.getAsJsonArray(),
-                                        path + separator + "anyOf");
-                            }
+                            parseSubArray(
+                                    attribute.getForeignRelationName(),
+                                    element.getAsJsonArray(),
+                                    path + separator + "anyOf");
                         }
                         attributes.put(attribute.getName(), "__ID");
                     }
 
-                } else if (element.isJsonPrimitive()) {
+                } else {
                     attributes.put("value", element);
-
-                } else {
                 }
 
                 /** build insert statement **/
-
-                String insert = "INSERT INTO " + relationName + "(";
-                String fields = "";
-                String values = "";
-
-                for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-                    fields += "`" + attribute.getKey() + "`" + ", ";
-                    values += attribute.getValue() + ", ";
-                }
-
-                insert = insert + fields.substring(0, fields.length() - 2) + ") VALUES (" + values.substring(0, values.length() - 2) + ")";
-
-                insertStatements.add(insert);
+                buildInsertStatement(relationName, attributes);
             }
 
-        }
-    }
-
-    private void parseMultiArray(JsonArray array, String path) {
-        if (array.size() > 0) {
-            String relationName = dataMapping.getAttribute(path, TypeMapper.TYPE_ARRAY).getForeignRelationName();
-
-            /** iterate and parse array items **/
-
-            int order = 0;
-            for (JsonElement element : array) {
-
-                LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-                attributes.put("ID", "__ID");
-                attributes.put("order", order);
-                order++;
-
-                if (TypeMapper.jsonStringToInt(getJsonType(element)) == TypeMapper.TYPE_OBJECT) {
-                    parseObject(
-                            element.getAsJsonObject(),
-                            path + separator + "anyOf");
-                    attributes.put("value_object", "__ID");
-
-                } else if (TypeMapper.jsonStringToInt(getJsonType(element)) == TypeMapper.TYPE_ARRAY) {
-                    Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf", TypeMapper.TYPE_ARRAY);
-                    String foreignName = attribute.getForeignRelationName();
-                    Relation foreignRelation   = relations.get(foreignName);
-
-                    if (foreignRelation.isMultiArray()) {
-                        parseMultiArray(
-                                element.getAsJsonArray(),
-                                path + separator + "anyOf");
-                    } else {
-                        parseSingleArray(
-                                element.getAsJsonArray(),
-                                path + separator + "anyOf");
-                    }
-                    attributes.put("value_array", "__ID");
-
-                } else if (TypeMapper.jsonStringToInt(getJsonType(element)) == TypeMapper.TYPE_BOOL) {
-                    attributes.put("value_boolean", element);
-
-                } else if (TypeMapper.jsonStringToInt(getJsonType(element)) == TypeMapper.TYPE_STRING) {
-                    attributes.put("value_string", element);
-
-                } else if (TypeMapper.jsonStringToInt(getJsonType(element)) == TypeMapper.TYPE_NUMBER) {
-                    attributes.put("value_number", element);
-
-                } else {
-                    attributes.put("value_null", element);
-                }
-
-                /** build insert statement **/
-
-                String insert = "INSERT INTO " + relationName + "(";
-                String fields = "";
-                String values = "";
-
-                for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-                    fields += "`" + attribute.getKey() + "`" + ", ";
-                    values += attribute.getValue() + ", ";
-                }
-
-                insert = insert + fields.substring(0, fields.length() - 2) + ") VALUES (" + values.substring(0, values.length() - 2) + ")";
-
-                insertStatements.add(insert);
-            }
         }
     }
 
     private void parseObject(JsonObject object, String path) {
         String relationName = "";
         LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-        attributes.put("ID", "__ID");
 
         /** iterate and parse properties **/
-
         for (Map.Entry<String, JsonElement> property : object.entrySet()) {
 
-            String type = getJsonType(property.getValue());
+            String type         = getJsonType(property.getValue());
             Attribute attribute = dataMapping.getAttribute(path + separator + property.getKey(), TypeMapper.jsonStringToInt(type));
-            relationName = dataMapping.getRelationName(path + separator + property.getKey(), TypeMapper.jsonStringToInt(type));
-            Object value;
-
+            relationName        = dataMapping.getRelationName(path + separator + property.getKey(), TypeMapper.jsonStringToInt(type));
 
             if (attribute.getType() == TypeMapper.TYPE_OBJECT) {
                 parseObject(property.getValue().getAsJsonObject(), path + separator + property.getKey());
-                value = "__ID";
+                attributes.put(attribute.getName(), "__ID");
 
             } else if (attribute.getType() == TypeMapper.TYPE_ARRAY) {
-                String foreignName = attribute.getForeignRelationName();
-                Relation relation   = relations.get(foreignName);
+                parseSubArray(
+                        attribute.getForeignRelationName(),
+                        property.getValue().getAsJsonArray(),
+                        path + separator + property.getKey());
+                attributes.put(attribute.getName(), "__ID");
 
-                if (relation.isMultiArray()) {
-                    parseMultiArray(
-                            property.getValue().getAsJsonArray(),
-                            path + separator + property.getKey());
-                } else {
-                    parseSingleArray(
-                            property.getValue().getAsJsonArray(),
-                            path + separator + property.getKey());
-                }
-                value = "__ID";
             } else {
-                value = property.getValue();
+                attributes.put(attribute.getName(), property.getValue());
             }
-
-            attributes.put(attribute.getName(), value);
-
         }
 
         /** build insert statement **/
+        buildInsertStatement(relationName, attributes);
+    }
 
-        String insert = "INSERT INTO " + relationName + "(";
-        String fields = "";
-        String values = "";
-
-        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-            fields += "`" + attribute.getKey() + "`" + ", ";
-            values += attribute.getValue() + ", ";
+    private void parseSubArray(String relationName, JsonArray array, String path) {
+        Relation relation   = relations.get(relationName);
+        if (relation.isMultiArray()) {
+            parseMultiArray(array, path);
+        } else {
+            parseSingleArray(array, path);
         }
-
-        insert = insert + fields.substring(0, fields.length() - 2) + ") VALUES (" + values.substring(0, values.length() - 2) + ")";
-
-        insertStatements.add(insert);
     }
 
     public void run() {
@@ -335,7 +257,7 @@ public class DataMover {
 
         } else {
             // alternative method body for exact property types
-            if(e.isJsonPrimitive() == false) {
+            if(!e.isJsonPrimitive()) {
                 return e.getClass().toString();
 
             } else {
