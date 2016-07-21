@@ -83,6 +83,29 @@ public class TypeMapper {
         }
     }
 
+    public static int jsonStringToInt(String elementString) {
+        if (elementString.contains("JsonArray") ||
+                elementString.contains("class com.google.gson.JsonArray") ){
+            return TYPE_ARRAY;
+
+        } else if(elementString.contains("JsonObject") ||
+                elementString.contains("class com.google.gson.JsonObject")) {
+            return TYPE_OBJECT;
+
+        } else if(elementString.contains("class com.google.gson.JsonPrimitive.String")) {
+            return TYPE_STRING;
+
+        } else if(elementString.contains("class com.google.gson.JsonPrimitive.Number")) {
+            return TYPE_NUMBER;
+
+        } else if(elementString.contains("class com.google.gson.JsonPrimitive.Boolean")) {
+            return TYPE_BOOL;
+
+        } else {
+            return TYPE_NULL;
+        }
+    }
+
     public static String jsonToString(JsonElement element) {
         String elementString = element.toString();
 

@@ -33,4 +33,9 @@ public class DataMapKey {
         }
         return false;
     }
+
+    @Override
+    public int hashCode() {
+        return path.hashCode() * 10 + type;
+    }
 }

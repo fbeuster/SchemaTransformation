@@ -1,12 +1,8 @@
 import com.google.gson.*;
 import schemaExtraction.Extraction;
-import schemaTransformation.capsules.Relation;
+import schemaTransformation.worker.DataMover;
 import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
-import utils.Config;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 
 public class Main {
@@ -20,6 +16,9 @@ public class Main {
      */
 
     public static void main(String[] args) {
+
+        System.out.println("+++ start schema extraction +++");
+
         Extraction extraction = new Extraction();
         extraction.run();
 
@@ -46,22 +45,24 @@ public class Main {
         if (object != null) {
             JsonObject properties = object.get("properties").getAsJsonObject();
 
+            System.out.println("+++ start schema transform +++");
+
             Transformer transformer = new Transformer(object.get("title").getAsString(), properties);
-            String rootRelation = transformer.run();
+            transformer.run();
             transformer.print();
 
-            System.out.println("root relation: " + rootRelation + "\n");
-
-            LinkedHashMap<String, Relation> relations = transformer.getRelations();
-            for (String name : relations.keySet()) {
-                System.out.println(relations.get(name).toSQL( new Config() ));
-            }
+            System.out.println("+++ start optimization +++");
 
             Optimizer optimizer = new Optimizer(transformer.getRelations(), transformer.getCollisions());
             optimizer.run();
-            optimizer.printResults();
 
-            System.out.println(transformer.getDataMappingLog());
+            System.out.println("+++ start data transfer +++");
+
+            DataMover dataMover = new DataMover(transformer.getRelations(), transformer.getDataMappingLog());
+            dataMover.run();
+            dataMover.print();
+
+            System.out.println("+++ all done +++");
         }
     }
 }

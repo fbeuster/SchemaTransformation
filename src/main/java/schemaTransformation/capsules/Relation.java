@@ -11,6 +11,7 @@ import java.util.ArrayList;
 public class Relation {
 
     private ArrayList<Attribute> attributes;
+    private boolean multiArray = false;
     private String name;
 
     public Relation(String name) {
@@ -39,6 +40,14 @@ public class Relation {
         }
 
         return false;
+    }
+
+    public boolean isMultiArray() {
+        return multiArray;
+    }
+
+    public void setMultiArray(boolean multiArray) {
+        this.multiArray = multiArray;
     }
 
     public String toSQL(Config config) {

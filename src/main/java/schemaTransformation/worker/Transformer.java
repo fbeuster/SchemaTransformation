@@ -62,6 +62,7 @@ public class Transformer {
 
             String relationName = uniqueRelationName(name + arraySuffix);
             Relation relation = new Relation(relationName);
+            relation.setMultiArray(true);
             relation.addAttribtue(new Attribute(primaryKeyName, TypeMapper.TYPE_ID));
             relation.addAttribtue(new Attribute(orderFieldName, TypeMapper.TYPE_ORDER));
 
@@ -92,7 +93,7 @@ public class Transformer {
                         extra);
 
             } else if (TypeMapper.jsonToInt( elementType ) == TypeMapper.TYPE_ARRAY) {
-                return makeArrayRelation( name, object.getAsJsonObject("items") );
+                return makeArrayRelation( name, object.getAsJsonObject("items"), object.getAsJsonObject("items").get("path").getAsString()  );
 
             } else {
                 return makePrimitiveRelation(name, elementType, object.getAsJsonObject("items").get("path").getAsString());
@@ -151,7 +152,7 @@ public class Transformer {
             foreign = makeRelation(propertyName, property.getAsJsonObject("properties"));
 
         } else if (attributeType == TypeMapper.TYPE_ARRAY) {
-            attributeName += primaryKeyName;
+            attributeName += arraySuffix + primaryKeyName;
             foreign = handleArrayRelations(propertyName, property);
         }
 
@@ -172,7 +173,7 @@ public class Transformer {
         valueFieldName  = config.getString("transformation.fields.value_field_name");
     }
 
-    private String makeArrayRelation(String name, JsonObject object) {
+    private String makeArrayRelation(String name, JsonObject object, String path) {
         String relationName = uniqueRelationName(name + arraySuffix);
         Relation relation   = new Relation(relationName);
         relation.addAttribtue(new Attribute(primaryKeyName, TypeMapper.TYPE_ID));
@@ -184,6 +185,7 @@ public class Transformer {
         relation.addAttribtue(arrayAttribute);
 
         relations.put(relationName, relation);
+        dataMapper.add(path, relationName, new Attribute(arrayAttribute.getName(), TypeMapper.TYPE_ARRAY));
 
         return relationName;
     }
@@ -236,6 +238,7 @@ public class Transformer {
                 /** single type attribute **/
                 Attribute attribute = handleSingleType(attributeName, entry.getKey(), property, relation);
                 relation.addAttribtue( attribute );
+                System.out.println(attribute.getName());
                 dataMapper.add( property.get("path").getAsString(), relationName, attribute );
             }
         }
