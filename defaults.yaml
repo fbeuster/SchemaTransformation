@@ -19,7 +19,8 @@ transformation:
   fields:
     array_suffix: Array
     object_suffix: Object
-    order_field_name: order
+    array_pkey_name: array_id
+    order_field_name: array_order
     primary_key_name: ID
     value_field_name: value
 sql:
