@@ -201,6 +201,8 @@ public class Transformer {
         Relation relation   = new Relation( uniqueRelationName(name + arraySuffix) );
         relation.addAttribtue(new Attribute(arrayPKeyName, Types.TYPE_ARRAY_ID));
         relation.addAttribtue(new Attribute(orderFieldName, Types.TYPE_ARRAY_ORDER));
+        relation.addPrimaryKey(arrayPKeyName);
+        relation.addPrimaryKey(orderFieldName);
 
         return relation;
     }
@@ -208,13 +210,13 @@ public class Transformer {
     private String makeNestedArrayRelation(String name, JsonObject object, String path) {
         Relation relation = makeBasicArrayRelation(name);
 
-        Attribute arrayAttribute = new Attribute(relation.getName() + arraySuffix + primaryKeyName, Types.TYPE_ID);
+        Attribute arrayAttribute = new Attribute(relation.getName() + arraySuffix + primaryKeyName, Types.TYPE_ARRAY);
         arrayAttribute.setForeignRelationName( handleArrayRelations(relation.getName(), object) );
 
         relation.addAttribtue(arrayAttribute);
 
         relations.put(relation.getName(), relation);
-        dataMapper.add(path, relation.getName(), new Attribute(arrayAttribute.getName(), Types.TYPE_ARRAY));
+        dataMapper.add(path, relation.getName(), arrayAttribute);
 
         return relation.getName();
     }
@@ -241,6 +243,7 @@ public class Transformer {
         String relationName = uniqueRelationName(name);
         Relation relation   = new Relation(relationName);
         relation.addAttribtue(new Attribute(primaryKeyName, Types.TYPE_ID));
+        relation.addPrimaryKey(primaryKeyName);
 
         relations.put(relationName, addProperties(relation, object));
 

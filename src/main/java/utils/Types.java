@@ -8,15 +8,15 @@ import com.google.gson.JsonPrimitive;
  */
 public class Types {
 
-    public static int TYPE_ARRAY    = 0;
-    public static int TYPE_ARRAY_ID = 1;
-    public static int TYPE_BOOL     = 2;
-    public static int TYPE_ID       = 3;
-    public static int TYPE_NULL     = 4;
-    public static int TYPE_NUMBER   = 5;
-    public static int TYPE_OBJECT   = 6;
-    public static int TYPE_ARRAY_ORDER = 7;
-    public static int TYPE_STRING   = 8;
+    public static int TYPE_ARRAY        = 0;
+    public static int TYPE_ARRAY_ID     = 1;
+    public static int TYPE_ARRAY_ORDER  = 2;
+    public static int TYPE_BOOL         = 3;
+    public static int TYPE_ID           = 4;
+    public static int TYPE_NULL         = 5;
+    public static int TYPE_NUMBER       = 6;
+    public static int TYPE_OBJECT       = 7;
+    public static int TYPE_STRING       = 8;
 
     public static String SQL_ARRAY          = "INT";
     public static String SQL_ARRAY_ID       = "INT";

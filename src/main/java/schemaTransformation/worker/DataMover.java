@@ -90,7 +90,7 @@ public class DataMover {
     }
 
     private String getArrayID(String relationName) {
-        return "(SELECT MAX(" + arrayPKeyName + ") AS max_id FROM " + relationName + " LIMIT 1)";
+        return "(SELECT IFNULL(MAX(`" + arrayPKeyName + "`), 0) FROM " + relationName + " LIMIT 1)";
     }
 
     private void saveLastArrayId(String relationName) {
@@ -106,7 +106,7 @@ public class DataMover {
             int order = 0;
             for (JsonElement element : array) {
                 LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-                attributes.put(arrayPKeyName, "@last_array_id_" + relationName);
+                attributes.put(arrayPKeyName, "@last_array_id_" + relationName + " + 1");
                 attributes.put(orderFieldName, order);
                 order++;
 
@@ -148,7 +148,7 @@ public class DataMover {
             int order = 0;
             for (JsonElement element : array) {
                 LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-                attributes.put(arrayPKeyName, "@last_array_id_" + relationName);
+                attributes.put(arrayPKeyName, "@last_array_id_" + relationName + " + 1");
                 attributes.put(orderFieldName, order);
                 order++;
 
@@ -182,7 +182,7 @@ public class DataMover {
                     Relation relation = relations.get(relationName);
 
                     for (Attribute attribute : relation.getAttributes()) {
-                        if (attribute.getName().equals(valueFieldName + "_" + Types.constantToString(Types.TYPE_ARRAY))) {
+                        if (attribute.getType() == Types.TYPE_ARRAY) {
                             parseSubArray(
                                     attribute.getForeignRelationName(),
                                     element.getAsJsonArray(),

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 public class Relation {
 
     private ArrayList<Attribute> attributes;
+    private ArrayList<String> primaryKeys;
     private boolean multiArray = false;
     private String name;
 
@@ -18,10 +19,15 @@ public class Relation {
         this.name = name;
 
         attributes = new ArrayList<>();
+        primaryKeys = new ArrayList<>();
     }
 
     public void addAttribtue(Attribute attribute) {
         attributes.add(attribute);
+    }
+
+    public void addPrimaryKey(String attributeName) {
+        primaryKeys.add(attributeName);
     }
 
     public ArrayList<Attribute> getAttributes() {
@@ -59,7 +65,13 @@ public class Relation {
             sql += attribute.toSQL() + ", ";
         }
 
-        sql += "PRIMARY KEY (`" + config.getString("transformation.fields.primary_key_name") + "`))";
+        String keyString = "";
+
+        for (String primaryKey : primaryKeys) {
+            keyString += "`" + primaryKey + "`, ";
+        }
+
+        sql += "PRIMARY KEY (" + keyString.substring(0, keyString.length() - 2) + "))";
 
         return sql;
     }
