@@ -82,6 +82,10 @@ public class DataMover {
         statements.add(relation + fields + values);
     }
 
+    public ArrayList<String> getStatements() {
+        return statements;
+    }
+
     private void loadConfig() {
         arrayPKeyName   = config.getString("transformation.fields.array_pkey_name");
         orderFieldName  = config.getString("transformation.fields.order_field_name");
@@ -265,18 +269,10 @@ public class DataMover {
         if (false) {
             String element = "{\"test\":[{\"data\" : {\"cool\" : 4}}]}";
             parseObject(parser.parse(element).getAsJsonObject(), separator + config.getString("mongodb.collection"));
+
         } else {
-
-            int i = 0;
             for (Document doc : docs.find()) {
-                if (i != 3) {
-                    i++;
-                    continue;
-                }
-
-                System.out.println(parser.parse(doc.toJson()));
                 parseObject(parser.parse(doc.toJson()).getAsJsonObject(), separator + config.getString("mongodb.collection"));
-                break;
             }
         }
     }

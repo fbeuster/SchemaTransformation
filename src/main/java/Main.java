@@ -6,6 +6,10 @@ import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
 import utils.Config;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 
 
@@ -53,11 +57,6 @@ public class Main {
 
             Transformer transformer = new Transformer(object.get("title").getAsString(), properties);
             transformer.run();
-            transformer.print();
-
-            for (Map.Entry<String, Relation> entry : transformer.getRelations().entrySet()) {
-                System.out.println(entry.getValue().toSQL(new Config()));
-            }
 
             System.out.println("+++ start optimization +++");
 
@@ -68,9 +67,38 @@ public class Main {
 
             DataMover dataMover = new DataMover(transformer.getRelations(), transformer.getDataMappingLog());
             dataMover.run();
-            dataMover.print();
 
             System.out.println("+++ all done +++");
+
+            Config config   = new Config();
+
+            String host     = config.getString("sql.host");
+            String port     = config.getString("sql.port");
+            String dataabse = config.getString("sql.database");
+            String user     = config.getString("sql.user");
+            String password = config.getString("sql.password");
+
+            String url      = "jdbc:mysql://" + host + ":" + port + "/" + dataabse;
+
+            try (Connection connection = DriverManager.getConnection(url, user, password)) {
+                System.out.println("Database connected!");
+
+                for (Map.Entry<String, Relation> entry : transformer.getRelations().entrySet()) {
+                    System.out.println(entry.getValue().toSQL(new Config()));
+                    Statement statement = connection.createStatement();
+                    statement.execute( entry.getValue().toSQL(new Config()) );
+                    statement.close();
+                }
+
+                for (String sql : dataMover.getStatements()) {
+                    System.out.println(sql);
+                    Statement statement = connection.createStatement();
+                    statement.execute( sql );
+                }
+
+            } catch (SQLException e) {
+                throw new IllegalStateException("Cannot connect the database!", e);
+            }
         }
     }
 }

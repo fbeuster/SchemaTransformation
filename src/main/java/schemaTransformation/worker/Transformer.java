@@ -266,6 +266,8 @@ public class Transformer {
         int i = 0;
         String append = "";
 
+        name = name.replaceAll("\\s+","_");
+
         while (relations.get(name + append) != null) {
             append = "_" + i;
             i++;

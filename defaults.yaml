@@ -24,4 +24,8 @@ transformation:
     primary_key_name: ID
     value_field_name: value
 sql:
-  database: myDB
+  database: database
+  user: mysql_user
+  password: password
+  host: localhost
+  port: 3306

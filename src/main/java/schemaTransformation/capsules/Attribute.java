@@ -37,11 +37,10 @@ public class Attribute {
         if ( type == Types.TYPE_ID ) {
             return "`" + name + "` " + Types.constantToSQL(type) + " NOT NULL AUTO_INCREMENT";
 
-        } else if ( type == Types.TYPE_ARRAY || type == Types.TYPE_ARRAY_ID ||
-                type == Types.TYPE_ARRAY_ORDER || type == Types.TYPE_OBJECT ) {
+        } else if ( type == Types.TYPE_ARRAY_ID || type == Types.TYPE_ARRAY_ORDER ) {
             return "`" + name + "` " + Types.constantToSQL(type) + " NOT NULL";
 
-        } else  {
+        } else {
             return "`" + name + "` " + Types.constantToSQL(type) + " NULL";
         }
     }

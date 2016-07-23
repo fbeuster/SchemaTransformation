@@ -23,7 +23,7 @@ public class Types {
     public static String SQL_ARRAY_ORDER    = "INT";
     public static String SQL_BOOL           = "BOOLEAN";
     public static String SQL_ID             = "INT";
-    public static String SQL_NULL           = "NULL";
+    public static String SQL_NULL           = "INT";
     public static String SQL_NUMBER         = "DOUBLE";
     public static String SQL_OBJECT         = "INT";
     public static String SQL_STRING         = "MEDIUMTEXT";
