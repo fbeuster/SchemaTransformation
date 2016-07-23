@@ -54,3 +54,6 @@ out
 *.iws
 *.iml
 atlassian-ide-plugin.xml
+
+# Project specific
+config.yaml
