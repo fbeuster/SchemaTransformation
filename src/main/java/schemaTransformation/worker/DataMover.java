@@ -47,6 +47,11 @@ public class DataMover {
     private MongoCollection<Document> docs;
 
     private String arrayPKeyName;
+    private String arraySuffix;
+    private String lastInsertPrefix;
+    private String lastArrayIdPrefix;
+    private String nameSeparator;
+    private String objectSuffix;
     private String orderFieldName;
     private String separator;
     private String valueFieldName;
@@ -87,10 +92,15 @@ public class DataMover {
     }
 
     private void loadConfig() {
-        arrayPKeyName   = config.getString("transformation.fields.array_pkey_name");
-        orderFieldName  = config.getString("transformation.fields.order_field_name");
-        separator       = config.getString("json.path_separator");
-        valueFieldName  = config.getString("transformation.fields.value_field_name");
+        arrayPKeyName       = config.getString("transformation.fields.array_pkey_name");
+        arraySuffix         = config.getString("transformation.fields.array_suffix");
+        lastArrayIdPrefix   = config.getString("transfer.last_array_id_prefix");
+        lastInsertPrefix    = config.getString("transfer.last_insert_prefix");
+        nameSeparator       = config.getString("transformation.fields.name_separator");
+        objectSuffix        = config.getString("transformation.fields.object_suffix");
+        orderFieldName      = config.getString("transformation.fields.order_field_name");
+        separator           = config.getString("json.path_separator");
+        valueFieldName      = config.getString("transformation.fields.value_field_name");
     }
 
     private String getArrayID(String relationName) {
@@ -98,7 +108,7 @@ public class DataMover {
     }
 
     private void saveLastArrayId(String relationName) {
-        statements.add("SET @last_array_id_" + relationName + " = " + getArrayID(relationName) + ";");
+        statements.add("SET @" + lastArrayIdPrefix + relationName + " = " + getArrayID(relationName) + ";");
     }
 
     private void parseMultiArray(JsonArray array, String path) {
@@ -110,7 +120,7 @@ public class DataMover {
             int order = 0;
             for (JsonElement element : array) {
                 LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-                attributes.put(arrayPKeyName, "@last_array_id_" + relationName + " + 1");
+                attributes.put(arrayPKeyName, "@" + lastArrayIdPrefix + relationName + " + 1");
                 attributes.put(orderFieldName, order);
                 order++;
 
@@ -121,7 +131,9 @@ public class DataMover {
                             path + separator + "anyOf");
 
                     saveLastInsertID(attribute.getForeignRelationName());
-                    attributes.put("value_object", "@last_insert_" + attribute.getForeignRelationName());
+                    attributes.put(
+                            valueFieldName + nameSeparator + objectSuffix,
+                            "@" + lastInsertPrefix + attribute.getForeignRelationName());
 
                 } else if (element.isJsonArray()) {
                     Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf", Types.TYPE_ARRAY);
@@ -130,11 +142,15 @@ public class DataMover {
                             element.getAsJsonArray(),
                             path + separator + "anyOf");
 
-                    attributes.put("value_array", getArrayID(attribute.getForeignRelationName()));
+                    attributes.put(
+                            valueFieldName + nameSeparator + arraySuffix,
+                            getArrayID(attribute.getForeignRelationName()));
 
                 } else {
                     int type = Types.jsonElementToInt(element);
-                    attributes.put("value_" + Types.constantToString(type), element);
+                    attributes.put(
+                            valueFieldName + nameSeparator + Types.constantToString(type),
+                            element);
                 }
 
                 /** build insert statement **/
@@ -152,7 +168,7 @@ public class DataMover {
             int order = 0;
             for (JsonElement element : array) {
                 LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-                attributes.put(arrayPKeyName, "@last_array_id_" + relationName + " + 1");
+                attributes.put(arrayPKeyName, "@" + lastArrayIdPrefix + relationName + " + 1");
                 attributes.put(orderFieldName, order);
                 order++;
 
@@ -165,7 +181,7 @@ public class DataMover {
                                     path + separator + "anyOf" + separator + property.getKey());
 
                             saveLastInsertID(attribute.getForeignRelationName());
-                            attributes.put(property.getKey(), "@last_insert_" + attribute.getForeignRelationName());
+                            attributes.put(property.getKey(), "@" + lastInsertPrefix + attribute.getForeignRelationName());
 
                         } else if (property.getValue().isJsonArray()) {
                             Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf" + separator + property.getKey(), Types.jsonElementToInt(property.getValue()));
@@ -197,7 +213,7 @@ public class DataMover {
                     }
 
                 } else {
-                    attributes.put("value", element);
+                    attributes.put(valueFieldName, element);
                 }
 
                 /** build insert statement **/
@@ -222,7 +238,7 @@ public class DataMover {
                 parseObject(property.getValue().getAsJsonObject(), path + separator + property.getKey());
 
                 saveLastInsertID(attribute.getForeignRelationName());
-                attributes.put(attribute.getName(), "@last_insert_" + attribute.getForeignRelationName());
+                attributes.put(attribute.getName(), "@" + lastInsertPrefix + attribute.getForeignRelationName());
 
             } else if (attribute.getType() == Types.TYPE_ARRAY) {
                 parseSubArray(
@@ -278,6 +294,6 @@ public class DataMover {
     }
 
     private void saveLastInsertID(String relationName) {
-        statements.add("SET @last_insert_" + relationName + " = LAST_INSERT_ID();");
+        statements.add("SET @" + lastInsertPrefix + relationName + " = LAST_INSERT_ID();");
     }
 }

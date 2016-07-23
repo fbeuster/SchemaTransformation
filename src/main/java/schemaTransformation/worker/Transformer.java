@@ -29,9 +29,10 @@ public class Transformer {
 
     private RelationCollisions collisions;
 
-    private String arraySuffix;
     private String arrayPKeyName;
+    private String arraySuffix;
     private String name;
+    private String nameSeparator;
     private String objectSuffix;
     private String orderFieldName;
     private String primaryKeyName;
@@ -136,7 +137,7 @@ public class Transformer {
             JsonObject type = element.getAsJsonObject();
 
             int attributeType       = Types.jsonToInt(type.get("type"));
-            String attributeName    = prepend + "_" + Types.jsonToString(type.get("type"));
+            String attributeName    = prepend + nameSeparator + Types.jsonToString(type.get("type"));
 
             if (name == null) {
                 name = attributeName;
@@ -145,11 +146,11 @@ public class Transformer {
             String foreign = null;
 
             if (Types.jsonToInt(type.get("type")) == Types.TYPE_OBJECT) {
-                foreign = makeRelation( name + objectSuffix, type.getAsJsonObject("properties"));
+                foreign = makeRelation( name + nameSeparator + objectSuffix, type.getAsJsonObject("properties"));
 
             } else if (Types.jsonToInt(type.get("type")) == Types.TYPE_ARRAY) {
                 if (!fromArray) {
-                    name += arraySuffix;
+                    name += nameSeparator + arraySuffix;
                 }
                 foreign = handleArrayRelations( name, type );
             }
@@ -175,7 +176,7 @@ public class Transformer {
             foreign = makeRelation(propertyName, property.getAsJsonObject("properties"));
 
         } else if (attributeType == Types.TYPE_ARRAY) {
-            attributeName += arraySuffix + primaryKeyName;
+            attributeName += nameSeparator + arraySuffix + primaryKeyName;
             foreign = handleArrayRelations(propertyName, property);
         }
 
@@ -189,8 +190,9 @@ public class Transformer {
     }
 
     private void loadConfig() {
-        arraySuffix     = config.getString("transformation.fields.array_suffix");
         arrayPKeyName   = config.getString("transformation.fields.array_pkey_name");
+        arraySuffix     = config.getString("transformation.fields.array_suffix");
+        nameSeparator   = config.getString("transformation.fields.name_separator");
         objectSuffix    = config.getString("transformation.fields.object_suffix");
         orderFieldName  = config.getString("transformation.fields.order_field_name");
         primaryKeyName  = config.getString("transformation.fields.primary_key_name");
@@ -198,7 +200,7 @@ public class Transformer {
     }
 
     private Relation makeBasicArrayRelation(String name) {
-        Relation relation   = new Relation( uniqueRelationName(name + arraySuffix) );
+        Relation relation   = new Relation( uniqueRelationName(name + nameSeparator + arraySuffix) );
         relation.addAttribtue(new Attribute(arrayPKeyName, Types.TYPE_ARRAY_ID));
         relation.addAttribtue(new Attribute(orderFieldName, Types.TYPE_ARRAY_ORDER));
         relation.addPrimaryKey(arrayPKeyName);
@@ -210,7 +212,7 @@ public class Transformer {
     private String makeNestedArrayRelation(String name, JsonObject object, String path) {
         Relation relation = makeBasicArrayRelation(name);
 
-        Attribute arrayAttribute = new Attribute(relation.getName() + arraySuffix + primaryKeyName, Types.TYPE_ARRAY);
+        Attribute arrayAttribute = new Attribute(relation.getName() + nameSeparator + arraySuffix + nameSeparator + primaryKeyName, Types.TYPE_ARRAY);
         arrayAttribute.setForeignRelationName( handleArrayRelations(relation.getName(), object) );
 
         relation.addAttribtue(arrayAttribute);
@@ -255,7 +257,7 @@ public class Transformer {
         String append = "";
 
         while (relation.hasAttribute(attributeName + append)) {
-            append = "_" + i;
+            append = nameSeparator + i;
             i++;
         }
 
@@ -266,10 +268,10 @@ public class Transformer {
         int i = 0;
         String append = "";
 
-        name = name.replaceAll("\\s+","_");
+        name = name.replaceAll("\\s+", nameSeparator);
 
         while (relations.get(name + append) != null) {
-            append = "_" + i;
+            append = nameSeparator + i;
             i++;
         }
 

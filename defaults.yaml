@@ -1,3 +1,12 @@
+# These are default values to configure the extraction of a JSON schema from
+# JSON data, the transformation from said schema into a relational schema and
+# the transfer from the JSON data into the new relational database.
+#
+# DO NOT CHANGE THESE VALUES!
+#
+# Adjustments can be placed into a separate config.yaml file in the root of
+# the projects directory.
+
 mongodb:
   database: myDB
   collection: myCollection
@@ -17,12 +26,16 @@ optimization:
     attribute_threshold: 2
 transformation:
   fields:
-    array_suffix: Array
-    object_suffix: Object
     array_pkey_name: array_id
+    array_suffix: array
+    name_separator: _
+    object_suffix: object
     order_field_name: array_order
     primary_key_name: ID
     value_field_name: value
+transfer:
+  last_array_id_prefix: last_array_id_
+  last_insert_prefix: last_insert_
 sql:
   database: database
   user: mysql_user
