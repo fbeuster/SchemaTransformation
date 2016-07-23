@@ -1,8 +1,0 @@
-mongodb:
-  database: test
-  collection: car_orders
-extraction:
-  debug:
-    json_schema: true
-sql:
-  database: aDB
