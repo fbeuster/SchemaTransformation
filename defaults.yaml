@@ -38,6 +38,7 @@ transfer:
   last_insert_prefix: last_insert_
 sql:
   database: database
+  drop_tables: false
   user: mysql_user
   password: password
   host: localhost

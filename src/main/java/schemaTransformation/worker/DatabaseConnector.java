@@ -18,6 +18,8 @@ public class DatabaseConnector {
 
     private ArrayList<String> statements;
 
+    private Boolean drop;
+
     private Connection connection;
 
     private LinkedHashMap<String, Relation> relations;
@@ -35,10 +37,23 @@ public class DatabaseConnector {
         loadConfig();
     }
 
+    private void dropTables() throws SQLException {
+        /** clear relations **/
+        for (Map.Entry<String, Relation> entry : relations.entrySet()) {
+            Statement statement = connection.createStatement();
+            String drop         = "DROP TABLE IF EXISTS `" + entry.getValue().getName() + "`;";
+
+            System.out.println(drop);
+            statement.execute( drop );
+            statement.close();
+        }
+    }
+
     private void execute() throws SQLException {
         /** create relations **/
         for (Map.Entry<String, Relation> entry :relations.entrySet()) {
             System.out.println(entry.getValue().toSQL(new Config()));
+
             Statement statement = connection.createStatement();
             statement.execute( entry.getValue().toSQL(new Config()) );
             statement.close();
@@ -47,6 +62,7 @@ public class DatabaseConnector {
         /** fill relations **/
         for (String sql : statements) {
             System.out.println(sql);
+
             Statement statement = connection.createStatement();
             statement.execute( sql );
         }
@@ -56,6 +72,7 @@ public class DatabaseConnector {
         Config config   = new Config();
 
         database = config.getString("sql.database");
+        drop     = config.getBoolean("sql.drop_tables");
         host     = config.getString("sql.host");
         password = config.getString("sql.password");
         port     = config.getString("sql.port");
@@ -67,6 +84,11 @@ public class DatabaseConnector {
 
         try {
             connection = DriverManager.getConnection(url, user, password);
+
+            if (drop) {
+                dropTables();
+            }
+
             execute();
 
         } catch (SQLException e) {
