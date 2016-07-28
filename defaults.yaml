@@ -25,6 +25,7 @@ optimization:
   inline:
     attribute_threshold: 2
 transformation:
+  debug: false
   fields:
     array_pkey_name: array_id
     array_suffix: array
@@ -38,6 +39,7 @@ transfer:
   last_insert_prefix: last_insert_
 sql:
   database: database
+  debug: false
   drop_tables: false
   user: mysql_user
   password: password

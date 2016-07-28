@@ -5,6 +5,8 @@ import schemaTransformation.worker.DatabaseConnector;
 import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
 
+import java.util.Calendar;
+
 
 public class Main {
     /** TODO
@@ -20,6 +22,7 @@ public class Main {
 
         System.out.println("+++ start schema extraction +++");
 
+        Calendar startExtraction = Calendar.getInstance();
         Extraction extraction = new Extraction();
         extraction.run();
 
@@ -48,25 +51,43 @@ public class Main {
 
             System.out.println("+++ start schema transform +++");
 
+
+            Calendar startTransform = Calendar.getInstance();
             Transformer transformer = new Transformer(object.get("title").getAsString(), properties);
             transformer.run();
 
             System.out.println("+++ start optimization +++");
 
+            Calendar startOpti = Calendar.getInstance();
             Optimizer optimizer = new Optimizer(transformer.getRelations(), transformer.getCollisions());
             optimizer.run();
 
             System.out.println("+++ start data transfer +++");
 
+            Calendar startMove = Calendar.getInstance();
             DataMover dataMover = new DataMover(transformer.getRelations(), transformer.getDataMappingLog());
             dataMover.run();
 
             System.out.println("+++ start SQL handling +++");
 
+            Calendar startDB = Calendar.getInstance();
             DatabaseConnector databaseConnector = new DatabaseConnector(transformer.getRelations(), dataMover.getStatements());
             databaseConnector.run();
 
             System.out.println("+++ all done +++");
+
+            Calendar endAll = Calendar.getInstance();
+
+            System.out.println();
+            System.out.println("Runtimes: ");
+            System.out.println("-------------------");
+            System.out.println("extraction  " + (startTransform.getTimeInMillis() - startExtraction.getTimeInMillis()) + " ms");
+            System.out.println("transform   " + (startOpti.getTimeInMillis() - startTransform.getTimeInMillis()) + " ms");
+            System.out.println("optimize    " + (startMove.getTimeInMillis() - startOpti.getTimeInMillis()) + " ms");
+            System.out.println("data map    " + (startDB.getTimeInMillis() - startMove.getTimeInMillis()) + " ms");
+            System.out.println("db transfer " + (endAll.getTimeInMillis() - startDB.getTimeInMillis()) + " ms");
+            System.out.println("-------------------");
+            System.out.println("total       " + (endAll.getTimeInMillis() - startExtraction.getTimeInMillis()) + " ms");
         }
     }
 }

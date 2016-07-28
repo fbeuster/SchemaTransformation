@@ -21,6 +21,8 @@ public class Transformer {
 
     private LinkedHashMap<String, Relation> relations;
 
+    private Boolean debug;
+
     private Config config;
 
     private DataMappingLog dataMapper;
@@ -103,6 +105,10 @@ public class Transformer {
             }
 
             relations.put(relation.getName(), relation);
+
+            if (debug) {
+                System.out.println(relation);
+            }
 
             return relation.getName();
 
@@ -192,6 +198,7 @@ public class Transformer {
     private void loadConfig() {
         arrayPKeyName   = config.getString("transformation.fields.array_pkey_name");
         arraySuffix     = config.getString("transformation.fields.array_suffix");
+        debug           = config.getBoolean("transformation.debug");
         nameSeparator   = config.getString("transformation.fields.name_separator");
         objectSuffix    = config.getString("transformation.fields.object_suffix");
         orderFieldName  = config.getString("transformation.fields.order_field_name");
@@ -220,6 +227,10 @@ public class Transformer {
         relations.put(relation.getName(), relation);
         dataMapper.add(path, relation.getName(), arrayAttribute);
 
+        if (debug) {
+            System.out.println(relation);
+        }
+
         return relation.getName();
     }
 
@@ -227,6 +238,10 @@ public class Transformer {
         Relation relation = makeBasicArrayRelation(name);
 
         relations.put(relation.getName(), addProperties(relation, object));
+
+        if (debug) {
+            System.out.println(relation);
+        }
 
         return relation.getName();
     }
@@ -238,6 +253,10 @@ public class Transformer {
         relations.put(relation.getName(), relation);
         dataMapper.add(path, relation.getName(), new Attribute(valueFieldName, Types.jsonToInt(element)));
 
+        if (debug) {
+            System.out.println(relation);
+        }
+
         return relation.getName();
     }
 
@@ -248,6 +267,10 @@ public class Transformer {
         relation.addPrimaryKey(primaryKeyName);
 
         relations.put(relationName, addProperties(relation, object));
+
+        if (debug) {
+            System.out.println(relations.get(relationName));
+        }
 
         return relationName;
     }

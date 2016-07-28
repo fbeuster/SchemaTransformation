@@ -18,6 +18,7 @@ public class DatabaseConnector {
 
     private ArrayList<String> statements;
 
+    private Boolean debug;
     private Boolean drop;
 
     private Connection connection;
@@ -43,7 +44,10 @@ public class DatabaseConnector {
             Statement statement = connection.createStatement();
             String drop         = "DROP TABLE IF EXISTS `" + entry.getValue().getName() + "`;";
 
-            System.out.println(drop);
+            if (debug) {
+                System.out.println(drop);
+            }
+
             statement.execute( drop );
             statement.close();
         }
@@ -52,7 +56,9 @@ public class DatabaseConnector {
     private void execute() throws SQLException {
         /** create relations **/
         for (Map.Entry<String, Relation> entry :relations.entrySet()) {
-            System.out.println(entry.getValue().toSQL(new Config()));
+            if (debug) {
+                System.out.println(entry.getValue().toSQL(new Config()));
+            }
 
             Statement statement = connection.createStatement();
             statement.execute( entry.getValue().toSQL(new Config()) );
@@ -61,7 +67,9 @@ public class DatabaseConnector {
 
         /** fill relations **/
         for (String sql : statements) {
-            System.out.println(sql);
+            if (debug) {
+                System.out.println(sql);
+            }
 
             Statement statement = connection.createStatement();
             statement.execute( sql );
@@ -72,6 +80,7 @@ public class DatabaseConnector {
         Config config   = new Config();
 
         database = config.getString("sql.database");
+        debug    = config.getBoolean("sql.debug");
         drop     = config.getBoolean("sql.drop_tables");
         host     = config.getString("sql.host");
         password = config.getString("sql.password");
