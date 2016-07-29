@@ -7,6 +7,8 @@
 # Adjustments can be placed into a separate config.yaml file in the root of
 # the projects directory.
 
+main:
+  runs: 1
 mongodb:
   database: myDB
   collection: myCollection

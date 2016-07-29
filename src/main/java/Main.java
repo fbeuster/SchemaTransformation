@@ -4,6 +4,7 @@ import schemaTransformation.worker.DataMover;
 import schemaTransformation.worker.DatabaseConnector;
 import schemaTransformation.worker.Optimizer;
 import schemaTransformation.worker.Transformer;
+import utils.Config;
 
 import java.util.Calendar;
 
@@ -19,7 +20,15 @@ public class Main {
      */
 
     public static void main(String[] args) {
+        Config config = new Config();
 
+        for (int i = 0; i < config.getInt("main.runs"); i++) {
+            System.out.println("+++ start run " + (i + 1) + " +++");
+            run();
+        }
+    }
+
+    private static void run() {
         System.out.println("+++ start schema extraction +++");
 
         Calendar startExtraction = Calendar.getInstance();
