@@ -48,5 +48,5 @@ sql:
   host: localhost
   password: password
   port: 3306
-  unique_index: false
+  insert_with_select: false
   user: mysql_user

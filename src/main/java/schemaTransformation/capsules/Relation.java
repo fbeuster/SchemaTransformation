@@ -10,9 +10,15 @@ import java.util.ArrayList;
  */
 public class Relation {
 
+    public static int TYPE_ARRAY    = 0;
+    public static int TYPE_MULTI    = 1;
+    public static int TYPE_OBJECT   = 2;
+
     private ArrayList<Attribute> attributes;
     private ArrayList<String> primaryKeys;
-    private boolean multiArray = false;
+
+    private int type;
+
     private String name;
 
     public Relation(String name) {
@@ -38,6 +44,10 @@ public class Relation {
         return name;
     }
 
+    public int getType() {
+        return type;
+    }
+
     public boolean hasAttribute(String name) {
         for (Attribute attribute : attributes) {
             if (attribute.getName().equals( name )) {
@@ -48,12 +58,8 @@ public class Relation {
         return false;
     }
 
-    public boolean isMultiArray() {
-        return multiArray;
-    }
-
-    public void setMultiArray(boolean multiArray) {
-        this.multiArray = multiArray;
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String toSQL(Config config) {

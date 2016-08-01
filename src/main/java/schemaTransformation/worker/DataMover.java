@@ -36,6 +36,8 @@ public class DataMover {
 
     private ArrayList<String> statements;
 
+    private Boolean insertWithSelect;
+
     private Config config;
 
     private DataMappingLog dataMapping;
@@ -87,6 +89,26 @@ public class DataMover {
         statements.add(relation + fields + values);
     }
 
+    private void buildInsertStatementWithSelect(String relationName, LinkedHashMap<String, Object> attributes) {
+        String fields = "";
+        String values = "";
+        String where = "";
+        String e = "";
+
+        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+            e = attribute.getKey();
+            fields += "`" + attribute.getKey() + "`" + ", ";
+            values += attribute.getValue() + " AS `" + attribute.getKey() + "`, ";
+            where += "`" + attribute.getKey() + "` = " + attribute.getValue() + " AND ";
+        }
+
+        String relation = "INSERT INTO `" + relationName + "` (" + fields.substring(0, fields.length() - 2) + ")";
+        relation += " SELECT * FROM (SELECT " + values.substring(0, values.length() - 2) + ") AS t1";
+        relation += " WHERE NOT EXISTS (SELECT `" + e + "` FROM `" + relationName + "` WHERE " + where.substring(0, where.length() - 5) + ") LIMIT 1";
+
+        statements.add(relation);
+    }
+
     public ArrayList<String> getStatements() {
         return statements;
     }
@@ -94,6 +116,7 @@ public class DataMover {
     private void loadConfig() {
         arrayPKeyName       = config.getString("transformation.fields.array_pkey_name");
         arraySuffix         = config.getString("transformation.fields.array_suffix");
+        insertWithSelect    = config.getBoolean("sql.inset_with_select");
         lastArrayIdPrefix   = config.getString("transfer.last_array_id_prefix");
         lastInsertPrefix    = config.getString("transfer.last_insert_prefix");
         nameSeparator       = config.getString("transformation.fields.name_separator");
@@ -130,7 +153,6 @@ public class DataMover {
                             element.getAsJsonObject(),
                             path + separator + "anyOf");
 
-                    saveLastInsertID(attribute.getForeignRelationName());
                     attributes.put(
                             valueFieldName + nameSeparator + objectSuffix,
                             "@" + lastInsertPrefix + attribute.getForeignRelationName());
@@ -154,7 +176,12 @@ public class DataMover {
                 }
 
                 /** build insert statement **/
-                buildInsertStatement(relationName, attributes);
+                if (insertWithSelect) {
+                    buildInsertStatementWithSelect(relationName, attributes);
+
+                } else {
+                    buildInsertStatement(relationName, attributes);
+                }
             }
         }
     }
@@ -180,7 +207,6 @@ public class DataMover {
                                     property.getValue().getAsJsonObject(),
                                     path + separator + "anyOf" + separator + property.getKey());
 
-                            saveLastInsertID(attribute.getForeignRelationName());
                             attributes.put(property.getKey(), "@" + lastInsertPrefix + attribute.getForeignRelationName());
 
                         } else if (property.getValue().isJsonArray()) {
@@ -217,7 +243,12 @@ public class DataMover {
                 }
 
                 /** build insert statement **/
-                buildInsertStatement(relationName, attributes);
+                if (insertWithSelect) {
+                    buildInsertStatementWithSelect(relationName, attributes);
+
+                } else {
+                    buildInsertStatement(relationName, attributes);
+                }
             }
 
         }
@@ -237,7 +268,6 @@ public class DataMover {
             if (attribute.getType() == Types.TYPE_OBJECT) {
                 parseObject(property.getValue().getAsJsonObject(), path + separator + property.getKey());
 
-                saveLastInsertID(attribute.getForeignRelationName());
                 attributes.put(attribute.getName(), "@" + lastInsertPrefix + attribute.getForeignRelationName());
 
             } else if (attribute.getType() == Types.TYPE_ARRAY) {
@@ -254,12 +284,23 @@ public class DataMover {
         }
 
         /** build insert statement **/
-        buildInsertStatement(relationName, attributes);
+        if (insertWithSelect) {
+            buildInsertStatementWithSelect(relationName, attributes);
+
+        } else {
+            buildInsertStatement(relationName, attributes);
+        }
+
+        if (insertWithSelect) {
+            saveLastInsertIDUnique(relationName, attributes);
+        } else {
+            saveLastInsertID(relationName);
+        }
     }
 
     private void parseSubArray(String relationName, JsonArray array, String path) {
         Relation relation   = relations.get(relationName);
-        if (relation.isMultiArray()) {
+        if (relation.getType() == Relation.TYPE_MULTI) {
             parseMultiArray(array, path);
         } else {
             parseSingleArray(array, path);
@@ -295,5 +336,17 @@ public class DataMover {
 
     private void saveLastInsertID(String relationName) {
         statements.add("SET @" + lastInsertPrefix + relationName + " = LAST_INSERT_ID();");
+    }
+
+    private void saveLastInsertIDUnique(String relationName, LinkedHashMap<String, Object> attributes) {
+        String where = "";
+
+        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+            where += "`" + attribute.getKey() + "` = " + attribute.getValue() + " AND ";
+        }
+
+        String relation = "SELECT @" + lastInsertPrefix + relationName + " := `ID` FROM `" + relationName + "` WHERE " + where.substring(0, where.length() - 5) + ";";
+
+        statements.add(relation);
     }
 }

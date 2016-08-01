@@ -94,7 +94,7 @@ public class Transformer {
             /** multiple type array **/
 
             Relation relation = makeBasicArrayRelation(name);
-            relation.setMultiArray(true);
+            relation.setType(Relation.TYPE_MULTI);
 
             for (Attribute attribute : handleMultipleTypes(object.getAsJsonObject("items"), valueFieldName, relation.getName(), relation, true)) {
                 JsonArray types = object.getAsJsonObject("items").getAsJsonArray("anyOf");
@@ -212,6 +212,7 @@ public class Transformer {
         relation.addAttribtue(new Attribute(orderFieldName, Types.TYPE_ARRAY_ORDER));
         relation.addPrimaryKey(arrayPKeyName);
         relation.addPrimaryKey(orderFieldName);
+        relation.setType(Relation.TYPE_ARRAY);
 
         return relation;
     }
@@ -265,6 +266,7 @@ public class Transformer {
         Relation relation   = new Relation(relationName);
         relation.addAttribtue(new Attribute(primaryKeyName, Types.TYPE_ID));
         relation.addPrimaryKey(primaryKeyName);
+        relation.setType(Relation.TYPE_OBJECT);
 
         relations.put(relationName, addProperties(relation, object));
 

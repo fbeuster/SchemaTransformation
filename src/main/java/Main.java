@@ -65,8 +65,9 @@ public class Main {
                 System.out.println("+++ start optimization +++");
 
                 Calendar startOpti = Calendar.getInstance();
-                Optimizer optimizer = new Optimizer(transformer.getRelations(), transformer.getCollisions());
-                optimizer.run();
+                Optimizer optimizer = new Optimizer(transformer.getRelations());
+                optimizer.check();
+                optimizer.printResults();
 
                 System.out.println("+++ start data transfer +++");
 

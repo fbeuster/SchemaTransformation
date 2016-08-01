@@ -1,64 +1,66 @@
 package schemaTransformation.worker;
 
+import schemaTransformation.capsules.Attribute;
 import schemaTransformation.capsules.Relation;
-import schemaTransformation.logs.RelationCollisions;
 import utils.Config;
 
 import java.util.LinkedHashMap;
-import java.util.TreeSet;
+import java.util.Map;
 
 /**
  * Created by Felix Beuster on 12.07.2016.
  */
 public class Optimizer {
+    private int attributeThreshold;
 
+    private LinkedHashMap<String, String> inlines;
     private LinkedHashMap<String, Relation> relations;
 
-    private Config config;
-    private RelationCollisions collisions;
-
-    private static double DEFAULT_OMIT_THRESHHOLD = 20.0;
-
-    private TreeSet<String> fewAttribtues;
-
-    public Optimizer(LinkedHashMap<String, Relation> relations, RelationCollisions collisions) {
-        this.collisions = collisions;
+    public Optimizer(LinkedHashMap<String, Relation> relations) {
         this.relations  = relations;
 
-        config          = new Config();
-        fewAttribtues   = new TreeSet<>();
+        inlines = new LinkedHashMap<>();
+
+        loadConfig();
     }
 
-    private void checkInline(Relation r) {
-        if (r.getAttributes().size() <= config.getInt("optimization.inline.attribute_threshold")) {
-            fewAttribtues.add(r.getName());
+    public void check() {
+        for (String name : relations.keySet()) {
+            checkInline(relations.get(name));
         }
     }
 
-    private void checkMerge() {
+    private void checkInline(Relation r) {
+        for (Attribute attribute : r.getAttributes()) {
+            if (attribute.getForeignRelationName() != null) {
+                Relation foreign = relations.get(attribute.getForeignRelationName());
+
+                if (foreign.getAttributes().size() <= attributeThreshold &&
+                        foreign.getType() == Relation.TYPE_OBJECT) {
+                    inlines.put(foreign.getName(), r.getName());
+                }
+            }
+        }
     }
 
-    private void checkMetrics(Relation r) {
+    private void handleInline() {
+    }
+
+    private void loadConfig() {
+        Config config = new Config();
+        attributeThreshold = config.getInt("optimization.inline.attribute_threshold");
+    }
+
+    public void optimize() {
+        handleInline();
     }
 
     public void printResults() {
         System.out.println("Optimization results:");
+        System.out.println();
 
-        int numberRelations = relations.size();
-        System.out.println(numberRelations + " tables were found in the schema");
-
-        int numberFewAttributes = fewAttribtues.size();
-        System.out.println(numberFewAttributes + " tables are below the attribute threshold");
-
-        int numberSameNames = collisions.size();
-        System.out.println(numberSameNames + " tables have the same name");
-    }
-
-    public void run() {
-        checkMerge();
-        for (String name : relations.keySet()) {
-            checkInline(relations.get(name));
-            checkMetrics(relations.get(name));
+        for (Map.Entry<String, String> inline : inlines.entrySet()) {
+            System.out.println("Relation " + inline.getKey() + " could be inlined into " + inline.getValue());
         }
     }
 }
