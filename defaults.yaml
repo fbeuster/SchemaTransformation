@@ -8,6 +8,8 @@
 # the projects directory.
 
 main:
+  debug:
+    total_runtimes: false
   runs: 1
 mongodb:
   database: myDB
@@ -43,7 +45,8 @@ sql:
   database: database
   debug: false
   drop_tables: false
-  user: mysql_user
-  password: password
   host: localhost
+  password: password
   port: 3306
+  unique_index: false
+  user: mysql_user
