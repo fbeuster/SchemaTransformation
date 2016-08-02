@@ -283,17 +283,13 @@ public class DataMover {
             }
         }
 
-        /** build insert statement **/
+        /** build insert statement, save ID **/
         if (insertWithSelect) {
             buildInsertStatementWithSelect(relationName, attributes);
+            saveLastInsertIDWithSelect(relationName, attributes);
 
         } else {
             buildInsertStatement(relationName, attributes);
-        }
-
-        if (insertWithSelect) {
-            saveLastInsertIDUnique(relationName, attributes);
-        } else {
             saveLastInsertID(relationName);
         }
     }
@@ -338,7 +334,7 @@ public class DataMover {
         statements.add("SET @" + lastInsertPrefix + relationName + " = LAST_INSERT_ID();");
     }
 
-    private void saveLastInsertIDUnique(String relationName, LinkedHashMap<String, Object> attributes) {
+    private void saveLastInsertIDWithSelect(String relationName, LinkedHashMap<String, Object> attributes) {
         String where = "";
 
         for (Map.Entry<String, Object> attribute : attributes.entrySet()) {

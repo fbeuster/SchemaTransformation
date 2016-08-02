@@ -58,8 +58,42 @@ public class Relation {
         return false;
     }
 
+    private String primaryKeys(Config config) {
+        String keyString = "";
+
+        for (String primaryKey : primaryKeys) {
+            keyString += "`" + primaryKey + "`, ";
+        }
+
+        if (keyString.length() > 0) {
+            return "PRIMARY KEY (" + keyString.substring(0, keyString.length() - 2) + ")";
+        }
+
+        return "";
+    }
+
     public void setType(int type) {
         this.type = type;
+    }
+
+    private String textIndices(Config config) {
+        if (config.getBoolean("sql.text_index.active")) {
+            String indices = "";
+
+            for(Attribute attribute : attributes) {
+                int size = config.getInt("sql.text_index.length");
+                size = size <= 767 ? size : 767;
+                if (attribute.getType() == Types.TYPE_STRING) {
+                    indices += "INDEX (`" + attribute.getName() + "`(" + size + ")), ";
+                }
+            }
+
+            if (indices.length() > 0) {
+                return ", " + indices.substring(0, indices.length() - 2);
+            }
+        }
+
+        return "";
     }
 
     public String toSQL(Config config) {
@@ -71,28 +105,8 @@ public class Relation {
             sql += attribute.toSQL() + ", ";
         }
 
-        String keyString = "";
-
-        for (String primaryKey : primaryKeys) {
-            keyString += "`" + primaryKey + "`, ";
-        }
-
-        sql += "PRIMARY KEY (" + keyString.substring(0, keyString.length() - 2) + ")";
-
-        if (config.getBoolean("sql.text_index.active")) {
-            String indices = "";
-
-            for(Attribute attribute : attributes) {
-                int size = config.getInt("sql.text_index.length");
-                if (attribute.getType() == Types.TYPE_STRING) {
-                    indices += "INDEX (`" + attribute.getName() + "`(" + size + ")), ";
-                }
-            }
-
-            if (indices.length() > 0) {
-                sql += ", " + indices.substring(0, indices.length() - 2);
-            }
-        }
+        sql += primaryKeys(config);
+        sql += textIndices(config);
 
         sql += ")";
 
