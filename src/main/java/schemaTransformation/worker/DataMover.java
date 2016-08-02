@@ -116,7 +116,7 @@ public class DataMover {
     private void loadConfig() {
         arrayPKeyName       = config.getString("transformation.fields.array_pkey_name");
         arraySuffix         = config.getString("transformation.fields.array_suffix");
-        insertWithSelect    = config.getBoolean("sql.inset_with_select");
+        insertWithSelect    = config.getBoolean("sql.insert_with_select");
         lastArrayIdPrefix   = config.getString("transfer.last_array_id_prefix");
         lastInsertPrefix    = config.getString("transfer.last_insert_prefix");
         nameSeparator       = config.getString("transformation.fields.name_separator");
