@@ -77,7 +77,24 @@ public class Relation {
             keyString += "`" + primaryKey + "`, ";
         }
 
-        sql += "PRIMARY KEY (" + keyString.substring(0, keyString.length() - 2) + "))";
+        sql += "PRIMARY KEY (" + keyString.substring(0, keyString.length() - 2) + ")";
+
+        if (config.getBoolean("sql.text_index.active")) {
+            String indices = "";
+
+            for(Attribute attribute : attributes) {
+                int size = config.getInt("sql.text_index.length");
+                if (attribute.getType() == Types.TYPE_STRING) {
+                    indices += "INDEX (`" + attribute.getName() + "`(" + size + ")), ";
+                }
+            }
+
+            if (indices.length() > 0) {
+                sql += ", " + indices.substring(0, indices.length() - 2);
+            }
+        }
+
+        sql += ")";
 
         return sql;
     }

@@ -49,4 +49,7 @@ sql:
   password: password
   port: 3306
   insert_with_select: false
+  text_index:
+    active: false
+    length: 500
   user: mysql_user
