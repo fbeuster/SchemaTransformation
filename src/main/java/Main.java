@@ -26,6 +26,12 @@ public class Main {
         for (int i = 0; i < config.getInt("main.runs"); i++) {
             System.out.println("+++ start run " + (i + 1) + " +++");
 
+            System.out.println("+++ start configuration check +++");
+
+            if (!config.isValid()) {
+                break;
+            }
+
             System.out.println("+++ start schema extraction +++");
 
             Calendar startExtraction = Calendar.getInstance();

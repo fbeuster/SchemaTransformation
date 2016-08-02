@@ -52,4 +52,6 @@ sql:
   text_index:
     active: false
     length: 500
+  unique_index:
+    active: false
   user: mysql_user

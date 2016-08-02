@@ -96,4 +96,14 @@ public class Config {
         Object r;
         return (r = get(key)) == null ? "" : r.toString();
     }
+
+    public boolean isValid() {
+        if (getBoolean("sql.insert_with_select") &&
+                getBoolean("sql.unique_index.active")) {
+            System.err.println("Error: 'unique index' and 'insert with select' cannot be combined");
+            return false;
+        }
+
+        return true;
+    }
 }
