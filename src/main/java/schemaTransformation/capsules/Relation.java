@@ -50,7 +50,7 @@ public class Relation {
 
     public boolean hasAttribute(String name) {
         for (Attribute attribute : attributes) {
-            if (attribute.getName().equals( name )) {
+            if (attribute.getName().equalsIgnoreCase( name )) {
                 return true;
             }
         }
