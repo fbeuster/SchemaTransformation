@@ -107,6 +107,7 @@ public class Relation {
 
         sql += primaryKeys(config);
         sql += textIndices(config);
+        sql += uniqueIndex(config);
 
         sql += ")";
 
@@ -128,5 +129,51 @@ public class Relation {
         }
 
         return ret;
+    }
+
+    private String uniqueIndex(Config config) {
+        if (config.getBoolean("sql.unique_index.active")) {
+            int max_key_size = 3072;
+            int total_text_size = max_key_size;
+            int text_fields = 0;
+
+            for (Attribute attribute : attributes) {
+                if (attribute.getType() == Types.TYPE_BOOL) {
+                    total_text_size -= 1;
+                } else if (attribute.getType() != Types.TYPE_STRING) {
+                    total_text_size -= 11;
+                } else {
+                    text_fields++;
+                }
+            }
+
+            int size = 0;
+            if (text_fields > 0) {
+                size = (int) Math.min(767, Math.floor(total_text_size / text_fields));
+            }
+            String keyString = "";
+
+            for (Attribute attribute : attributes) {
+                if (attribute.getType() != Types.TYPE_ARRAY_ID &&
+                        attribute.getType() != Types.TYPE_ID &&
+                        attribute.getType() != Types.TYPE_OBJECT &&
+                        attribute.getType() != Types.TYPE_ARRAY_ORDER &&
+                        attribute.getType() != Types.TYPE_ARRAY) {
+                    keyString += "`" + attribute.getName() + "`";
+
+                    if (attribute.getType() == Types.TYPE_STRING) {
+                        keyString += "(" + size + ")";
+                    }
+
+                    keyString += ", ";
+                }
+            }
+
+            if (keyString.length() > 0) {
+                return ", UNIQUE INDEX `redundancyAvoidance` (" + keyString.substring(0, keyString.length() - 2) + ")";
+            }
+        }
+
+        return "";
     }
 }
