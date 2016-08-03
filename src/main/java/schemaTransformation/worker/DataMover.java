@@ -36,6 +36,7 @@ public class DataMover {
 
     private ArrayList<String> statements;
 
+    private Boolean insertUnique;
     private Boolean insertWithSelect;
 
     private Config config;
@@ -89,6 +90,25 @@ public class DataMover {
         statements.add(relation + fields + values);
     }
 
+    private void buildInsertIgnoreStatement(String relationName, LinkedHashMap<String, Object> attributes) {
+        String fields = "";
+        String values = "";
+        String duplicate = "";
+
+        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+            fields += "`" + attribute.getKey() + "`" + ", ";
+            values += attribute.getValue() + ", ";
+        }
+
+        String relation = "INSERT INTO " + relationName;
+        fields = "(" + fields.substring(0, fields.length() - 2) + ") ";
+        values = "VALUES (" + values.substring(0, values.length() - 2) + ") ";
+        duplicate = "ON DUPLICATE KEY UPDATE;";
+        // INSERT INTO table (a) VALUES (0) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)
+
+        statements.add(relation + fields + values);
+    }
+
     private void buildInsertStatementWithSelect(String relationName, LinkedHashMap<String, Object> attributes) {
         String fields = "";
         String values = "";
@@ -116,6 +136,7 @@ public class DataMover {
     private void loadConfig() {
         arrayPKeyName       = config.getString("transformation.fields.array_pkey_name");
         arraySuffix         = config.getString("transformation.fields.array_suffix");
+        insertUnique        = config.getBoolean("sql.unique_index.active");
         insertWithSelect    = config.getBoolean("sql.insert_with_select");
         lastArrayIdPrefix   = config.getString("transfer.last_array_id_prefix");
         lastInsertPrefix    = config.getString("transfer.last_insert_prefix");
@@ -178,6 +199,9 @@ public class DataMover {
                 /** build insert statement **/
                 if (insertWithSelect) {
                     buildInsertStatementWithSelect(relationName, attributes);
+
+                } else if (insertUnique) {
+                    buildInsertIgnoreStatement(relationName, attributes);
 
                 } else {
                     buildInsertStatement(relationName, attributes);
@@ -246,6 +270,9 @@ public class DataMover {
                 if (insertWithSelect) {
                     buildInsertStatementWithSelect(relationName, attributes);
 
+                } else if (insertUnique) {
+                    buildInsertIgnoreStatement(relationName, attributes);
+
                 } else {
                     buildInsertStatement(relationName, attributes);
                 }
@@ -287,6 +314,10 @@ public class DataMover {
         if (insertWithSelect) {
             buildInsertStatementWithSelect(relationName, attributes);
             saveLastInsertIDWithSelect(relationName, attributes);
+
+        } else if (insertUnique) {
+            buildInsertIgnoreStatement(relationName, attributes);
+            saveLastInsertID(relationName);
 
         } else {
             buildInsertStatement(relationName, attributes);
