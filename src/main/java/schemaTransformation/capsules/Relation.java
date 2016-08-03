@@ -44,6 +44,10 @@ public class Relation {
         return name;
     }
 
+    public ArrayList<String> getPrimaryKeys() {
+        return primaryKeys;
+    }
+
     public int getType() {
         return type;
     }

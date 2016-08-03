@@ -90,10 +90,11 @@ public class DataMover {
         statements.add(relation + fields + values);
     }
 
-    private void buildInsertIgnoreStatement(String relationName, LinkedHashMap<String, Object> attributes) {
-        String fields = "";
-        String values = "";
-        String duplicate = "";
+    private void buildInsertDuplicateStatement(String relationName, LinkedHashMap<String, Object> attributes) {
+        String duplicate;
+        String fields   = "";
+        String pName    = relations.get(relationName).getPrimaryKeys().get(0);
+        String values   = "";
 
         for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
             fields += "`" + attribute.getKey() + "`" + ", ";
@@ -101,12 +102,11 @@ public class DataMover {
         }
 
         String relation = "INSERT INTO " + relationName;
-        fields = "(" + fields.substring(0, fields.length() - 2) + ") ";
-        values = "VALUES (" + values.substring(0, values.length() - 2) + ") ";
-        duplicate = "ON DUPLICATE KEY UPDATE;";
-        // INSERT INTO table (a) VALUES (0) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)
+        fields          = " (" + fields.substring(0, fields.length() - 2) + ")";
+        values          = " VALUES (" + values.substring(0, values.length() - 2) + ")";
+        duplicate       = " ON DUPLICATE KEY UPDATE `" + pName + "`=LAST_INSERT_ID(`" + pName + "`);";
 
-        statements.add(relation + fields + values);
+        statements.add(relation + fields + values + duplicate);
     }
 
     private void buildInsertStatementWithSelect(String relationName, LinkedHashMap<String, Object> attributes) {
@@ -201,7 +201,7 @@ public class DataMover {
                     buildInsertStatementWithSelect(relationName, attributes);
 
                 } else if (insertUnique) {
-                    buildInsertIgnoreStatement(relationName, attributes);
+                    buildInsertDuplicateStatement(relationName, attributes);
 
                 } else {
                     buildInsertStatement(relationName, attributes);
@@ -271,7 +271,7 @@ public class DataMover {
                     buildInsertStatementWithSelect(relationName, attributes);
 
                 } else if (insertUnique) {
-                    buildInsertIgnoreStatement(relationName, attributes);
+                    buildInsertDuplicateStatement(relationName, attributes);
 
                 } else {
                     buildInsertStatement(relationName, attributes);
@@ -316,7 +316,7 @@ public class DataMover {
             saveLastInsertIDWithSelect(relationName, attributes);
 
         } else if (insertUnique) {
-            buildInsertIgnoreStatement(relationName, attributes);
+            buildInsertDuplicateStatement(relationName, attributes);
             saveLastInsertID(relationName);
 
         } else {
