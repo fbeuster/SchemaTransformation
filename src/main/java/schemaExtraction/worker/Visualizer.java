@@ -34,20 +34,30 @@ public class Visualizer {
         Document schema = new Document();
 
         // store description of current node
-        if (n.getArrayOrder().size() > 0) {
+        int memberOcc = 0;
+        float memRel = 0.0f;
 
-        }
         int nodeOcc     = n.countDocId();
         float occRel    = nodeOcc * 100 / parentOcc;
         String desc     = "Document occurrence: " + nodeOcc + "/" + parentOcc + ", " + occRel + "%";
 
         if (n.getPropType().size() > 1) {
-            int memberOcc   = n.getPropType().get(propType);
-            float memRel    = memberOcc * 100 / parentOcc;
-            desc            += "; Member occurrence: " + memberOcc + "/" + parentOcc + ", " + memRel + "%";
+            memberOcc   = n.getPropType().get(propType);
+            memRel      = memberOcc * 100 / parentOcc;
+            desc        += "; Member occurrence: " + memberOcc + "/" + parentOcc + ", " + memRel + "%";
         }
         schema.append("description", desc);
         schema.append("path", n.getPath());
+
+        schema.append("document_occurrence_actual", nodeOcc);
+        schema.append("document_occurrence_total", parentOcc);
+        schema.append("document_occurrence_relative", occRel);
+
+        if (n.getPropType().size() > 1) {
+            schema.append("member_occurrence_actual", memberOcc);
+            schema.append("member_occurrence_total", parentOcc);
+            schema.append("member_occurrence_relative", memRel);
+        }
 
         // node contains JsonObject
         if (propType.contains("JsonObject") || propType.contains("class com.google.gson.JsonObject")) {
