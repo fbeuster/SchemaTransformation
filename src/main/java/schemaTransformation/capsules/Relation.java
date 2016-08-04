@@ -163,13 +163,18 @@ public class Relation {
                         attribute.getType() != Types.TYPE_OBJECT &&
                         attribute.getType() != Types.TYPE_ARRAY_ORDER &&
                         attribute.getType() != Types.TYPE_ARRAY) {
-                    keyString += "`" + attribute.getName() + "`";
+
 
                     if (attribute.getType() == Types.TYPE_STRING) {
-                        keyString += "(" + size + ")";
-                    }
+                        if (!config.getBoolean("sql.unique_index.hash")) {
+                            keyString += "`" + attribute.getName() + "`(" + size + ")";
+                            keyString += ", ";
+                        }
 
-                    keyString += ", ";
+                    } else {
+                        keyString += "`" + attribute.getName() + "`";
+                        keyString += ", ";
+                    }
                 }
             }
 

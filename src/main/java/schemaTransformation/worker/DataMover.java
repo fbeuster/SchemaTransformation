@@ -36,8 +36,9 @@ public class DataMover {
 
     private ArrayList<String> statements;
 
-    private Boolean insertUnique;
     private Boolean insertWithSelect;
+    private Boolean uniqueIndex;
+    private Boolean uniqueIndexHash;
 
     private Config config;
 
@@ -51,6 +52,7 @@ public class DataMover {
 
     private String arrayPKeyName;
     private String arraySuffix;
+    private String hashSuffix;
     private String lastInsertPrefix;
     private String lastArrayIdPrefix;
     private String nameSeparator;
@@ -136,13 +138,15 @@ public class DataMover {
     private void loadConfig() {
         arrayPKeyName       = config.getString("transformation.fields.array_pkey_name");
         arraySuffix         = config.getString("transformation.fields.array_suffix");
-        insertUnique        = config.getBoolean("sql.unique_index.active");
+        hashSuffix          = config.getString("transformation.fields.hash_suffix");
         insertWithSelect    = config.getBoolean("sql.insert_with_select");
         lastArrayIdPrefix   = config.getString("transfer.last_array_id_prefix");
         lastInsertPrefix    = config.getString("transfer.last_insert_prefix");
         nameSeparator       = config.getString("transformation.fields.name_separator");
         objectSuffix        = config.getString("transformation.fields.object_suffix");
         orderFieldName      = config.getString("transformation.fields.order_field_name");
+        uniqueIndex         = config.getBoolean("sql.unique_index.active");
+        uniqueIndexHash     = config.getBoolean("sql.unique_index.hash");
         separator           = config.getString("json.path_separator");
         valueFieldName      = config.getString("transformation.fields.value_field_name");
     }
@@ -194,13 +198,18 @@ public class DataMover {
                     attributes.put(
                             valueFieldName + nameSeparator + Types.constantToString(type),
                             element);
+
+                    if (uniqueIndex && uniqueIndexHash &&
+                            type == Types.TYPE_STRING) {
+                        attributes.put(valueFieldName + nameSeparator + Types.constantToString(type) + nameSeparator + hashSuffix, "SHA2(" + element + ", 512)");
+                    }
                 }
 
                 /** build insert statement **/
                 if (insertWithSelect) {
                     buildInsertStatementWithSelect(relationName, attributes);
 
-                } else if (insertUnique) {
+                } else if (uniqueIndex) {
                     buildInsertDuplicateStatement(relationName, attributes);
 
                 } else {
@@ -264,13 +273,18 @@ public class DataMover {
 
                 } else {
                     attributes.put(valueFieldName, element);
+
+                    if (uniqueIndex && uniqueIndexHash &&
+                            Types.jsonToInt(element) == Types.TYPE_STRING) {
+                        attributes.put(valueFieldName + nameSeparator + hashSuffix, "SHA2(" + element + ", 512)");
+                    }
                 }
 
                 /** build insert statement **/
                 if (insertWithSelect) {
                     buildInsertStatementWithSelect(relationName, attributes);
 
-                } else if (insertUnique) {
+                } else if (uniqueIndex) {
                     buildInsertDuplicateStatement(relationName, attributes);
 
                 } else {
@@ -307,6 +321,11 @@ public class DataMover {
 
             } else {
                 attributes.put(attribute.getName(), property.getValue());
+
+                if (uniqueIndex && uniqueIndexHash &&
+                        attribute.getType() == Types.TYPE_STRING) {
+                    attributes.put(attribute.getName() + nameSeparator + hashSuffix, "SHA2(" + property.getValue() + ", 512)");
+                }
             }
         }
 
@@ -315,7 +334,7 @@ public class DataMover {
             buildInsertStatementWithSelect(relationName, attributes);
             saveLastInsertIDWithSelect(relationName, attributes);
 
-        } else if (insertUnique) {
+        } else if (uniqueIndex) {
             buildInsertDuplicateStatement(relationName, attributes);
             saveLastInsertID(relationName);
 

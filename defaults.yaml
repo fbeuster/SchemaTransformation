@@ -33,6 +33,7 @@ transformation:
   fields:
     array_pkey_name: array_id
     array_suffix: array
+    hash_suffix: hash
     name_separator: _
     object_suffix: object
     order_field_name: array_order
@@ -54,4 +55,5 @@ sql:
     length: 500
   unique_index:
     active: false
+    hash: false
   user: mysql_user

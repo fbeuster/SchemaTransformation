@@ -22,6 +22,8 @@ public class Transformer {
     private LinkedHashMap<String, Relation> relations;
 
     private Boolean debug;
+    private Boolean uniqueIndex;
+    private Boolean uniqueIndexHash;
 
     private Config config;
 
@@ -33,6 +35,7 @@ public class Transformer {
 
     private String arrayPKeyName;
     private String arraySuffix;
+    private String hashSuffix;
     private String name;
     private String nameSeparator;
     private String objectSuffix;
@@ -65,6 +68,11 @@ public class Transformer {
                     relation.addAttribtue(attribute);
                     dataMapper.add( path, relation.getName(), attribute );
 
+                    if (uniqueIndex && uniqueIndexHash &&
+                            attribute.getType() == Types.TYPE_STRING) {
+                        relation.addAttribtue(new Attribute(attribute.getName() + nameSeparator + hashSuffix, Types.TYPE_HASH));
+                    }
+
                     i++;
                 }
 
@@ -73,6 +81,11 @@ public class Transformer {
                 Attribute attribute = handleSingleType(attributeName, entry.getKey(), property, relation);
                 relation.addAttribtue( attribute );
                 dataMapper.add( property.get("path").getAsString(), relation.getName(), attribute );
+
+                if (uniqueIndex && uniqueIndexHash &&
+                        attribute.getType() == Types.TYPE_STRING) {
+                    relation.addAttribtue(new Attribute(attribute.getName() + nameSeparator + hashSuffix, Types.TYPE_HASH));
+                }
             }
         }
 
@@ -102,6 +115,11 @@ public class Transformer {
 
                 relation.addAttribtue(attribute);
                 dataMapper.add( path, relation.getName(), attribute );
+
+                if (uniqueIndex && uniqueIndexHash &&
+                        attribute.getType() == Types.TYPE_STRING) {
+                    relation.addAttribtue(new Attribute(attribute.getName() + nameSeparator + hashSuffix, Types.TYPE_HASH));
+                }
             }
 
             relations.put(relation.getName(), relation);
@@ -199,10 +217,13 @@ public class Transformer {
         arrayPKeyName   = config.getString("transformation.fields.array_pkey_name");
         arraySuffix     = config.getString("transformation.fields.array_suffix");
         debug           = config.getBoolean("transformation.debug");
+        hashSuffix      = config.getString("transformation.fields.hash_suffix");
         nameSeparator   = config.getString("transformation.fields.name_separator");
         objectSuffix    = config.getString("transformation.fields.object_suffix");
         orderFieldName  = config.getString("transformation.fields.order_field_name");
         primaryKeyName  = config.getString("transformation.fields.primary_key_name");
+        uniqueIndex     = config.getBoolean("sql.unique_index.active");
+        uniqueIndexHash = config.getBoolean("sql.unique_index.hash");
         valueFieldName  = config.getString("transformation.fields.value_field_name");
     }
 
@@ -250,6 +271,11 @@ public class Transformer {
     private String makePrimitiveArrayRelation(String name, JsonElement element, String path) {
         Relation relation = makeBasicArrayRelation(name);
         relation.addAttribtue(new Attribute(valueFieldName, Types.jsonToInt(element)));
+
+        if (uniqueIndex && uniqueIndexHash &&
+                Types.jsonToInt(element) == Types.TYPE_STRING) {
+            relation.addAttribtue(new Attribute(valueFieldName + nameSeparator + hashSuffix, Types.TYPE_HASH));
+        }
 
         relations.put(relation.getName(), relation);
         dataMapper.add(path, relation.getName(), new Attribute(valueFieldName, Types.jsonToInt(element)));

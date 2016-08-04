@@ -12,16 +12,18 @@ public class Types {
     public static int TYPE_ARRAY_ID     = 1;
     public static int TYPE_ARRAY_ORDER  = 2;
     public static int TYPE_BOOL         = 3;
-    public static int TYPE_ID           = 4;
-    public static int TYPE_NULL         = 5;
-    public static int TYPE_NUMBER       = 6;
-    public static int TYPE_OBJECT       = 7;
-    public static int TYPE_STRING       = 8;
+    public static int TYPE_HASH         = 4;
+    public static int TYPE_ID           = 5;
+    public static int TYPE_NULL         = 6;
+    public static int TYPE_NUMBER       = 7;
+    public static int TYPE_OBJECT       = 8;
+    public static int TYPE_STRING       = 9;
 
     public static String SQL_ARRAY          = "INT";
     public static String SQL_ARRAY_ID       = "INT";
     public static String SQL_ARRAY_ORDER    = "INT";
     public static String SQL_BOOL           = "BOOLEAN";
+    public static String SQL_HASH           = "VARCHAR";
     public static String SQL_ID             = "INT";
     public static String SQL_NULL           = "INT";
     public static String SQL_NUMBER         = "DOUBLE";
@@ -32,6 +34,7 @@ public class Types {
     public static String STRING_ARRAY_ID    = "array_id";
     public static String STRING_ARRAY_ORDER = "order";
     public static String STRING_BOOL        = "boolean";
+    public static String STRING_HASH        = "hash";
     public static String STRING_ID          = "id";
     public static String STRING_NULL        = "null";
     public static String STRING_NUMBER      = "number";
@@ -43,6 +46,7 @@ public class Types {
         } else if ( type == TYPE_ARRAY_ID   ) { return SQL_ARRAY_ID;
         } else if ( type == TYPE_ARRAY_ORDER) { return SQL_ARRAY_ORDER;
         } else if ( type == TYPE_BOOL       ) { return SQL_BOOL;
+        } else if ( type == TYPE_HASH       ) { return SQL_HASH;
         } else if ( type == TYPE_ID         ) { return SQL_ID;
         } else if ( type == TYPE_NUMBER     ) { return SQL_NUMBER;
         } else if ( type == TYPE_OBJECT     ) { return SQL_OBJECT;
@@ -56,6 +60,7 @@ public class Types {
         } else if ( type == TYPE_ARRAY_ID   ) { return STRING_ARRAY_ID;
         } else if ( type == TYPE_ARRAY_ORDER) { return STRING_ARRAY_ORDER;
         } else if ( type == TYPE_BOOL       ) { return STRING_BOOL;
+        } else if ( type == TYPE_HASH       ) { return STRING_HASH;
         } else if ( type == TYPE_ID         ) { return STRING_ID;
         } else if ( type == TYPE_NUMBER     ) { return STRING_NUMBER;
         } else if ( type == TYPE_OBJECT     ) { return STRING_OBJECT;

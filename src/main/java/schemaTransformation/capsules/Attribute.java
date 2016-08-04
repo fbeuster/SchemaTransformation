@@ -40,6 +40,9 @@ public class Attribute {
         } else if ( type == Types.TYPE_ARRAY_ID || type == Types.TYPE_ARRAY_ORDER ) {
             return "`" + name + "` " + Types.constantToSQL(type) + " NOT NULL";
 
+        } else if ( type == Types.TYPE_HASH ) {
+            return "`" + name + "` " + Types.constantToSQL(type) + "(128) NULL";
+
         } else {
             return "`" + name + "` " + Types.constantToSQL(type) + " NULL";
         }
