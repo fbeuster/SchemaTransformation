@@ -9,6 +9,7 @@
 
 main:
   debug:
+    single_runtimes: false
     total_runtimes: false
   runs: 1
 mongodb:

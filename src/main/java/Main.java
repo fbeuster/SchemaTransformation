@@ -98,16 +98,9 @@ public class Main {
                 runtimes[i][4] = endAll.getTimeInMillis() - startDB.getTimeInMillis();
                 runtimes[i][5] = endAll.getTimeInMillis() - startExtraction.getTimeInMillis();
 
-                System.out.println();
-                System.out.println("Runtimes: ");
-                System.out.println("-------------------");
-                System.out.println("extraction  " + runtimes[i][0] + " ms");
-                System.out.println("transform   " + runtimes[i][1] + " ms");
-                System.out.println("optimize    " + runtimes[i][2] + " ms");
-                System.out.println("data map    " + runtimes[i][3] + " ms");
-                System.out.println("db transfer " + runtimes[i][4] + " ms");
-                System.out.println("-------------------");
-                System.out.println("total       " + runtimes[i][5] + " ms");
+                if (config.getBoolean("main.debug.single_runtimes")) {
+                    printSingleRuntimes(runtimes, i);
+                }
             }
         }
 
@@ -179,5 +172,18 @@ public class Main {
         }
 
         return min;
+    }
+
+    private static void printSingleRuntimes(long[][] runtimes, int i) {
+        System.out.println();
+        System.out.println("Runtimes: ");
+        System.out.println("-------------------");
+        System.out.println("extraction  " + runtimes[i][0] + " ms");
+        System.out.println("transform   " + runtimes[i][1] + " ms");
+        System.out.println("optimize    " + runtimes[i][2] + " ms");
+        System.out.println("data map    " + runtimes[i][3] + " ms");
+        System.out.println("db transfer " + runtimes[i][4] + " ms");
+        System.out.println("-------------------");
+        System.out.println("total       " + runtimes[i][5] + " ms");
     }
 }
