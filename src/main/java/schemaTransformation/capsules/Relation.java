@@ -185,4 +185,8 @@ public class Relation {
 
         return "";
     }
+
+    public void removeAttribute(Attribute attribute) {
+        attributes.remove(attribute);
+    }
 }

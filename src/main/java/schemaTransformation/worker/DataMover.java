@@ -295,6 +295,48 @@ public class DataMover {
         }
     }
 
+    private LinkedHashMap<String, Object> inlineAttributes(JsonObject object, String path) {
+        LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
+
+        /** iterate and parse properties **/
+        for (Map.Entry<String, JsonElement> property : object.entrySet()) {
+
+            int type = Types.jsonElementToInt(property.getValue());
+            Attribute attribute = dataMapping.getAttribute(path + separator + property.getKey(), type);
+
+            if (attribute == null) {
+                for (Map.Entry<String, Object> entry: inlineAttributes(property.getValue().getAsJsonObject(), path + separator + property.getKey()).entrySet()) {
+                    attributes.put(entry.getKey(), entry.getValue());
+                }
+
+            } else {
+                if (attribute.getType() == Types.TYPE_OBJECT) {
+                    parseObject(property.getValue().getAsJsonObject(), path + separator + property.getKey());
+
+                    attributes.put(attribute.getName(), "@" + lastInsertPrefix + attribute.getForeignRelationName());
+
+                } else if (attribute.getType() == Types.TYPE_ARRAY) {
+                    parseSubArray(
+                            attribute.getForeignRelationName(),
+                            property.getValue().getAsJsonArray(),
+                            path + separator + property.getKey());
+
+                    attributes.put(attribute.getName(), getArrayID(attribute.getForeignRelationName()));
+
+                } else {
+                    attributes.put(attribute.getName(), property.getValue());
+
+                    if (uniqueIndex && uniqueIndexHash &&
+                            attribute.getType() == Types.TYPE_STRING) {
+                        attributes.put(attribute.getName() + nameSeparator + hashSuffix, "SHA2(" + property.getValue() + ", 512)");
+                    }
+                }
+            }
+        }
+
+        return attributes;
+    }
+
     private void parseObject(JsonObject object, String path) {
         String relationName = "";
         LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
@@ -304,27 +346,35 @@ public class DataMover {
 
             int type = Types.jsonElementToInt(property.getValue());
             Attribute attribute = dataMapping.getAttribute(path + separator + property.getKey(), type);
-            relationName        = dataMapping.getRelationName(path + separator + property.getKey(), type);
 
-            if (attribute.getType() == Types.TYPE_OBJECT) {
-                parseObject(property.getValue().getAsJsonObject(), path + separator + property.getKey());
-
-                attributes.put(attribute.getName(), "@" + lastInsertPrefix + attribute.getForeignRelationName());
-
-            } else if (attribute.getType() == Types.TYPE_ARRAY) {
-                parseSubArray(
-                        attribute.getForeignRelationName(),
-                        property.getValue().getAsJsonArray(),
-                        path + separator + property.getKey());
-
-                attributes.put(attribute.getName(), getArrayID(attribute.getForeignRelationName()));
+            if (attribute == null) {
+                for (Map.Entry<String, Object> entry : inlineAttributes(property.getValue().getAsJsonObject(), path + separator + property.getKey()).entrySet()) {
+                    attributes.put(entry.getKey(), entry.getValue());
+                }
 
             } else {
-                attributes.put(attribute.getName(), property.getValue());
+                relationName = dataMapping.getRelationName(path + separator + property.getKey(), type);
 
-                if (uniqueIndex && uniqueIndexHash &&
-                        attribute.getType() == Types.TYPE_STRING) {
-                    attributes.put(attribute.getName() + nameSeparator + hashSuffix, "SHA2(" + property.getValue() + ", 512)");
+                if (attribute.getType() == Types.TYPE_OBJECT) {
+                    parseObject(property.getValue().getAsJsonObject(), path + separator + property.getKey());
+
+                    attributes.put(attribute.getName(), "@" + lastInsertPrefix + attribute.getForeignRelationName());
+
+                } else if (attribute.getType() == Types.TYPE_ARRAY) {
+                    parseSubArray(
+                            attribute.getForeignRelationName(),
+                            property.getValue().getAsJsonArray(),
+                            path + separator + property.getKey());
+
+                    attributes.put(attribute.getName(), getArrayID(attribute.getForeignRelationName()));
+
+                } else {
+                    attributes.put(attribute.getName(), property.getValue());
+
+                    if (uniqueIndex && uniqueIndexHash &&
+                            attribute.getType() == Types.TYPE_STRING) {
+                        attributes.put(attribute.getName() + nameSeparator + hashSuffix, "SHA2(" + property.getValue() + ", 512)");
+                    }
                 }
             }
         }

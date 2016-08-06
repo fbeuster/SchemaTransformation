@@ -47,4 +47,28 @@ public class Attribute {
             return "`" + name + "` " + Types.constantToSQL(type) + " NULL";
         }
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Attribute) {
+            Attribute other = (Attribute) obj;
+
+            if (name.equals(other.getName()) && type == other.getType() && (
+                    (foreignRelationName == null && other.getForeignRelationName() == null) ||
+                    (foreignRelationName.equals(other.getForeignRelationName()))
+            )) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode() * 10 + type;
+    }
 }

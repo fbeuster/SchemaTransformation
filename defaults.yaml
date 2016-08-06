@@ -28,7 +28,9 @@ json:
   path_separator: "/"
 optimization:
   inline:
+    ask_inline: true
     attribute_threshold: 2
+    auto_inline: false
 transformation:
   debug: false
   fields:

@@ -1,5 +1,6 @@
 import com.google.gson.*;
 import schemaExtraction.Extraction;
+import schemaTransformation.capsules.Relation;
 import schemaTransformation.worker.DataMover;
 import schemaTransformation.worker.DatabaseConnector;
 import schemaTransformation.worker.Optimizer;
@@ -7,6 +8,7 @@ import schemaTransformation.worker.Transformer;
 import utils.Config;
 
 import java.util.Calendar;
+import java.util.Map;
 
 
 public class Main {
@@ -16,7 +18,7 @@ public class Main {
      *  - put path separator in a class constant
      *  - do name check before naming a node 'anyOf'
      *  - check property names for path separators
-     *  - relation tree?
+     *  - database connector should be inside of DataMover to avoid build up of statements
      */
 
     public static void main(String[] args) {
@@ -71,20 +73,19 @@ public class Main {
                 System.out.println("+++ start optimization +++");
 
                 Calendar startOpti = Calendar.getInstance();
-                Optimizer optimizer = new Optimizer(transformer.getRelations());
-                optimizer.check();
-                optimizer.printResults();
+                Optimizer optimizer = new Optimizer(transformer.getRelations(), transformer.getDataMappingLog());
+                optimizer.run();
 
                 System.out.println("+++ start data transfer +++");
 
                 Calendar startMove = Calendar.getInstance();
-                DataMover dataMover = new DataMover(transformer.getRelations(), transformer.getDataMappingLog());
+                DataMover dataMover = new DataMover(optimizer.getRelations(), optimizer.getDataMappingLog());
                 dataMover.run();
 
                 System.out.println("+++ start SQL handling +++");
 
                 Calendar startDB = Calendar.getInstance();
-                DatabaseConnector databaseConnector = new DatabaseConnector(transformer.getRelations(), dataMover.getStatements());
+                DatabaseConnector databaseConnector = new DatabaseConnector(optimizer.getRelations(), dataMover.getStatements());
                 databaseConnector.run();
 
                 System.out.println("+++ all done +++");
