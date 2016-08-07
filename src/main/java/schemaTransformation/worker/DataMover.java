@@ -165,37 +165,6 @@ public class DataMover {
         return attributes;
     }
 
-    private void parseMultiArray(JsonArray array, String path) {
-        if (array.size() > 0) {
-            String relationName = dataMapping.getAttribute(path, Types.TYPE_ARRAY).getForeignRelationName();
-            saveLastArrayId(relationName);
-
-            /** iterate and parse array items **/
-            int order = 0;
-            for (JsonElement element : array) {
-                LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-                attributes.put(arrayPKeyName, "@" + lastArrayIdPrefix + relationName + " + 1");
-                attributes.put(orderFieldName, order);
-                order++;
-
-                for (Map.Entry<String, Object> entry : parseMultiArrayElement(element, path).entrySet()) {
-                    attributes.put(entry.getKey(), entry.getValue());
-                }
-
-                /** build insert statement **/
-                if (insertWithSelect) {
-                    buildInsertStatementWithSelect(relationName, attributes);
-
-                } else if (uniqueIndex) {
-                    buildInsertDuplicateStatement(relationName, attributes);
-
-                } else {
-                    buildInsertStatement(relationName, attributes);
-                }
-            }
-        }
-    }
-
     private LinkedHashMap<String, Object> parseMultiArrayElement(JsonElement element, String path) {
         LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
 
@@ -232,38 +201,6 @@ public class DataMover {
         }
 
         return attributes;
-    }
-
-    private void parseSingleArray(JsonArray array, String path) {
-        if (array.size() > 0) {
-            String relationName = dataMapping.getAttribute(path, Types.TYPE_ARRAY).getForeignRelationName();
-            saveLastArrayId(relationName);
-
-            /** iterate and parse array items **/
-            int order = 0;
-            for (JsonElement element : array) {
-                LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-                attributes.put(arrayPKeyName, "@" + lastArrayIdPrefix + relationName + " + 1");
-                attributes.put(orderFieldName, order);
-                order++;
-
-                for (Map.Entry<String, Object> entry : parseSingleArrayElement(element, path, relationName).entrySet()) {
-                    attributes.put(entry.getKey(), entry.getValue());
-                }
-
-                /** build insert statement **/
-                if (insertWithSelect) {
-                    buildInsertStatementWithSelect(relationName, attributes);
-
-                } else if (uniqueIndex) {
-                    buildInsertDuplicateStatement(relationName, attributes);
-
-                } else {
-                    buildInsertStatement(relationName, attributes);
-                }
-            }
-
-        }
     }
 
     private LinkedHashMap<String, Object> parseSingleArrayElement(JsonElement element, String path, String relationName) {
@@ -382,11 +319,41 @@ public class DataMover {
     }
 
     private void parseSubArray(String relationName, JsonArray array, String path) {
-        Relation relation   = relations.get(relationName);
-        if (relation.getType() == Relation.TYPE_MULTI) {
-            parseMultiArray(array, path);
-        } else {
-            parseSingleArray(array, path);
+        if (array.size() > 0) {
+            saveLastArrayId(relationName);
+
+            /** iterate and parse array items **/
+            int order = 0;
+            for (JsonElement element : array) {
+                LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
+                LinkedHashMap<String, Object> valueAttributes;
+
+                attributes.put(arrayPKeyName, "@" + lastArrayIdPrefix + relationName + " + 1");
+                attributes.put(orderFieldName, order);
+                order++;
+
+                if (relations.get(relationName).getType() == Relation.TYPE_MULTI) {
+                    valueAttributes = parseMultiArrayElement(element, path);
+
+                } else {
+                    valueAttributes = parseSingleArrayElement(element, path, relationName);
+                }
+
+                for (Map.Entry<String, Object> entry : valueAttributes.entrySet()) {
+                    attributes.put(entry.getKey(), entry.getValue());
+                }
+
+                /** build insert statement **/
+                if (insertWithSelect) {
+                    buildInsertStatementWithSelect(relationName, attributes);
+
+                } else if (uniqueIndex) {
+                    buildInsertDuplicateStatement(relationName, attributes);
+
+                } else {
+                    buildInsertStatement(relationName, attributes);
+                }
+            }
         }
     }
 
