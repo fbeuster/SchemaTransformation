@@ -31,6 +31,9 @@ optimization:
     ask_inline: true
     attribute_threshold: 2
     auto_inline: false
+  merge:
+    ask_merge: true
+    auto_merge: false
 transformation:
   debug: false
   fields:

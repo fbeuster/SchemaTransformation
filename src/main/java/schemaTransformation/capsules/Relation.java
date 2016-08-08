@@ -62,6 +62,16 @@ public class Relation {
         return false;
     }
 
+    public boolean hasAttribute(Attribute attribute) {
+        for (Attribute a : attributes) {
+            if (a.equals(attribute)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private String primaryKeys(Config config) {
         String keyString = "";
 

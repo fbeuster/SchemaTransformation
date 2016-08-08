@@ -4,9 +4,11 @@ import schemaTransformation.capsules.Attribute;
 import schemaTransformation.capsules.DataMapKey;
 import schemaTransformation.capsules.Relation;
 import schemaTransformation.logs.DataMappingLog;
+import schemaTransformation.logs.RelationCollisions;
 import utils.Config;
 import utils.Types;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -17,7 +19,9 @@ import java.util.Scanner;
 public class Optimizer {
 
     private Boolean askInline;
+    private Boolean askMerge;
     private Boolean autoInline;
+    private Boolean autoMerge;
 
     private int attributeThreshold;
 
@@ -25,10 +29,13 @@ public class Optimizer {
     private LinkedHashMap<String, Relation> relations;
     private DataMappingLog dataMappingLog;
 
+    private RelationCollisions collsions;
+
     private String nameSeparator;
     private String primaryKeyName;
 
-    public Optimizer(LinkedHashMap<String, Relation> relations, DataMappingLog dataMappingLog) {
+    public Optimizer(LinkedHashMap<String, Relation> relations, DataMappingLog dataMappingLog, RelationCollisions collisions) {
+        this.collsions      = collisions;
         this.dataMappingLog = dataMappingLog;
         this.relations      = relations;
 
@@ -45,6 +52,31 @@ public class Optimizer {
                 if (foreign.getAttributes().size() <= attributeThreshold &&
                         foreign.getType() == Relation.TYPE_OBJECT) {
                     inlines.put(foreign.getName(), r.getName());
+                }
+            }
+        }
+    }
+
+    private void checkMerge() {
+        // this method was done quick and dirty. definitely could be better
+        if (collsions.size() > 0) {
+            for (Map.Entry<String, ArrayList<String>> entry : collsions.getCollisions().entrySet()) {
+                Relation original = relations.get(entry.getKey());
+
+                for (String name : entry.getValue()) {
+                    Relation conflict = relations.get(name);
+
+                    if (original.getAttributes().size() != conflict.getAttributes().size()) {
+                        collsions.remove(entry.getKey(), name);
+
+                    } else {
+                        for (Attribute attribute : conflict.getAttributes()) {
+                            if (!original.hasAttribute(attribute)) {
+                                collsions.remove(entry.getKey(), name);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -84,11 +116,42 @@ public class Optimizer {
         }
     }
 
+    private void handleMerge() {
+        // this method was done quick and dirty. definitely could be better
+        if (collsions.size() > 0) {
+            for (Map.Entry<String, ArrayList<String>> entry : collsions.getCollisions().entrySet()) {
+                Relation original = relations.get(entry.getKey());
+
+                for (String conflictName : entry.getValue()) {
+                    for (Attribute attribute : original.getAttributes()) {
+                        String path = dataMappingLog.getPath(conflictName, attribute);
+
+                        if  (path != null) { // primary key and order fields
+                            dataMappingLog.add(path, entry.getKey(), attribute);
+                        }
+                    }
+
+                    relations.remove(conflictName);
+
+                    for (Map.Entry<String, Relation> relation : relations.entrySet()) {
+                        for (Attribute attribute : relation.getValue().getAttributes()) {
+                            if (attribute.getForeignRelationName() != null && attribute.getForeignRelationName().equals(conflictName)) {
+                                attribute.setForeignRelationName(entry.getKey());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void loadConfig() {
         Config config = new Config();
         askInline           = config.getBoolean("optimization.inline.ask_inline");
+        askMerge            = config.getBoolean("optimization.merge.ask_merge");
         attributeThreshold  = config.getInt("optimization.inline.attribute_threshold");
         autoInline          = config.getBoolean("optimization.inline.auto_inline");
+        autoMerge           = config.getBoolean("optimization.merge.auto_merge");
         nameSeparator       = config.getString("transformation.fields.name_separator");
         primaryKeyName      = config.getString("transformation.fields.primary_key_name");
     }
@@ -109,17 +172,40 @@ public class Optimizer {
             checkInline(relations.get(name));
         }
 
+        checkMerge();
+
         if (autoInline) {
             handleInline();
 
         } else if(askInline) {
+            for (Map.Entry<String, String> inline : inlines.entrySet()) {
+                System.out.println("Relation " + inline.getKey() + " could be inlined into " + inline.getValue());
+            }
+
+            Scanner scan = new Scanner(System.in);
+            System.out.print("Do you want to continue with these inlines? ");
+
+            String merge = scan.nextLine();
+
+            if (merge.toLowerCase().matches("([y](es)?)|1|(t(rue)?)")) {
+                handleInline();
+            }
+        }
+
+        if (autoMerge) {
+            handleMerge();
+
+        } else if(askMerge) {
+            System.out.println(collsions);
+            System.out.println("All collision can be merged.");
+
             Scanner scan = new Scanner(System.in);
             System.out.print("Do you want to continue with these merges? ");
 
             String merge = scan.nextLine();
 
             if (merge.toLowerCase().matches("([y](es)?)|1|(t(rue)?)")) {
-                handleInline();
+                handleMerge();
             }
         }
     }

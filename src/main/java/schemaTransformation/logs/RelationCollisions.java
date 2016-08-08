@@ -25,6 +25,10 @@ public class RelationCollisions {
         collisions.put(original, collisionList);
     }
 
+    public LinkedHashMap<String, ArrayList<String>> getCollisions() {
+        return collisions;
+    }
+
     public int size() {
         return collisions.size();
     }
@@ -44,5 +48,11 @@ public class RelationCollisions {
         }
 
         return ret;
+    }
+
+    public void remove(String original, String conflict) {
+        ArrayList<String> temp = collisions.get(original);
+        temp.remove(conflict);
+        collisions.put(original, temp);
     }
 }
