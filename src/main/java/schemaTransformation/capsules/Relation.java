@@ -36,6 +36,29 @@ public class Relation {
         primaryKeys.add(attributeName);
     }
 
+    private String foreignKeys(Config config) {
+        String keyString = "";
+
+        for (Attribute a : attributes) {
+            if (a.getType() == Types.TYPE_OBJECT) {
+                String key_name                 = "fk" + config.getString("transformation.fields.name_separator") + a.getName();
+                String referenced_attribute     = config.getString("transformation.fields.primary_key_name");
+                String referenced_relation      = a.getForeignRelationName();
+                String referencing_attribute    = a.getName();
+
+                keyString += " FOREIGN KEY `" + key_name + "`(`" + referencing_attribute + "`)";
+                keyString += " REFERENCES `" + referenced_relation + "`(`" + referenced_attribute + "`)";
+                keyString += " ON UPDATE CASCADE ON DELETE SET NULL, ";
+            }
+        }
+
+        if (keyString.length() > 0) {
+            return ", " + keyString.substring(0, keyString.length() - 2);
+        }
+
+        return "";
+    }
+
     public ArrayList<Attribute> getAttributes() {
         return attributes;
     }
@@ -120,6 +143,7 @@ public class Relation {
         }
 
         sql += primaryKeys(config);
+        sql += foreignKeys(config);
         sql += textIndices(config);
         sql += uniqueIndex(config);
 

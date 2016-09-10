@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.ListIterator;
 import java.util.Map;
 
 /**
@@ -40,7 +41,14 @@ public class DatabaseConnector {
 
     private void dropTables() throws SQLException {
         /** clear relations **/
-        for (Map.Entry<String, Relation> entry : relations.entrySet()) {
+
+        /** Due to the foreign key restrains, the tables have to be dropped in reverse order. **/
+
+        ListIterator<Map.Entry<String, Relation>> iterator = new ArrayList<>(relations.entrySet())
+                                                                    .listIterator(relations.size());
+
+        while (iterator.hasPrevious()) {
+            Map.Entry<String, Relation> entry = iterator.previous();
             Statement statement = connection.createStatement();
             String drop         = "DROP TABLE IF EXISTS `" + entry.getValue().getName() + "`;";
 
