@@ -330,6 +330,8 @@ public class Transformer {
         int i = 0;
         String append = "";
 
+        attributeName = attributeName.replaceAll("\\s+", nameSeparator);
+
         while (relation.hasAttribute(attributeName + append)) {
             append = nameSeparator + i;
             i++;

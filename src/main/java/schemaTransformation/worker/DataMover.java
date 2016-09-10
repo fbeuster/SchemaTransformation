@@ -157,7 +157,7 @@ public class DataMover {
                 attributes.put(attribute.getName(), parseObjectProperty(attribute, property, path));
 
                 if (attribute.getType() == Types.TYPE_ARRAY) {
-                    attributes.put(property.getKey() + nameSeparator + arraySuffix + nameSeparator + "order", 0);
+                    attributes.put(attribute.getForeignRelationName() + nameSeparator + arraySuffix + nameSeparator + "order", 0);
                 }
 
                 if (uniqueIndex && uniqueIndexHash && attribute.getType() == Types.TYPE_STRING) {
@@ -215,15 +215,12 @@ public class DataMover {
 
         if (element.isJsonObject()) {
             for (Map.Entry<String, JsonElement> property : element.getAsJsonObject().entrySet()) {
+                Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf" + separator + property.getKey(), Types.jsonElementToInt(property.getValue()));
+
+                attributes.put(attribute.getName(), parseSingleArrayObjectProperty(property, path));
 
                 if (property.getValue().isJsonArray()) {
-                    Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf" + separator + property.getKey(), Types.jsonElementToInt(property.getValue()));
-
-                    attributes.put(attribute.getName(), parseSingleArrayObjectProperty(property, path));
                     attributes.put(attribute.getForeignRelationName() + nameSeparator + arraySuffix + nameSeparator + "order", 0);
-
-                } else {
-                    attributes.put(property.getKey(), parseSingleArrayObjectProperty(property, path));
                 }
             }
 
@@ -296,7 +293,7 @@ public class DataMover {
                 attributes.put(attribute.getName(), parseObjectProperty(attribute, property, path));
 
                 if (attribute.getType() == Types.TYPE_ARRAY) {
-                    attributes.put(property.getKey() + nameSeparator + arraySuffix + nameSeparator + "order", 0);
+                    attributes.put(attribute.getForeignRelationName() + nameSeparator + arraySuffix + nameSeparator + "order", 0);
                 }
 
                 if (uniqueIndex && uniqueIndexHash && attribute.getType() == Types.TYPE_STRING) {
