@@ -200,7 +200,7 @@ public class Transformer {
         int attributeType = Types.jsonToInt(property.get("type"));
 
         if (attributeType == Types.TYPE_OBJECT) {
-            attributeName += primaryKeyName;
+            attributeName += nameSeparator + primaryKeyName;
 
             Attribute attribute = new Attribute(uniqueAttributeName(relation, attributeName), attributeType);
             attribute.setForeignRelationName( makeRelation(propertyName, property.getAsJsonObject("properties")) );
@@ -209,7 +209,7 @@ public class Transformer {
 
         } else if (attributeType == Types.TYPE_ARRAY) {
             String orderName = attributeName + nameSeparator + arraySuffix + nameSeparator + "order";
-            attributeName += nameSeparator + arraySuffix + primaryKeyName;
+            attributeName += nameSeparator + arraySuffix + nameSeparator + primaryKeyName;
 
             Attribute attribute = new Attribute(uniqueAttributeName(relation, attributeName), attributeType);
             attribute.setForeignRelationName( handleArrayRelations(propertyName, property) );
