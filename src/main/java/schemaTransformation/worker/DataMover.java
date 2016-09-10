@@ -192,6 +192,9 @@ public class DataMover {
             attributes.put(
                     attribute.getForeignRelationName() + nameSeparator + arrayPKeyName,
                     getArrayID(attribute.getForeignRelationName()));
+            attributes.put(
+                    attribute.getForeignRelationName() + nameSeparator + arraySuffix + nameSeparator + "order",
+                    0);
 
         } else {
             int type = Types.jsonElementToInt(element);
@@ -212,7 +215,16 @@ public class DataMover {
 
         if (element.isJsonObject()) {
             for (Map.Entry<String, JsonElement> property : element.getAsJsonObject().entrySet()) {
-                attributes.put(property.getKey(), parseSingleArrayObjectProperty(property, path));
+
+                if (property.getValue().isJsonArray()) {
+                    Attribute attribute = dataMapping.getAttribute(path + separator + "anyOf" + separator + property.getKey(), Types.jsonElementToInt(property.getValue()));
+
+                    attributes.put(attribute.getName(), parseSingleArrayObjectProperty(property, path));
+                    attributes.put(attribute.getForeignRelationName() + nameSeparator + arraySuffix + nameSeparator + "order", 0);
+
+                } else {
+                    attributes.put(property.getKey(), parseSingleArrayObjectProperty(property, path));
+                }
             }
 
         } else if (element.isJsonArray()) {
@@ -227,6 +239,7 @@ public class DataMover {
                 }
 
                 attributes.put(attribute.getName(), getArrayID(attribute.getForeignRelationName()));
+                attributes.put(attribute.getForeignRelationName() + nameSeparator + arraySuffix + nameSeparator + "order:", 0);
             }
 
         } else {
