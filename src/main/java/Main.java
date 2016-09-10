@@ -1,6 +1,5 @@
 import com.google.gson.*;
 import schemaExtraction.Extraction;
-import schemaTransformation.capsules.Relation;
 import schemaTransformation.worker.DataMover;
 import schemaTransformation.worker.DatabaseConnector;
 import schemaTransformation.worker.Optimizer;
@@ -8,7 +7,6 @@ import schemaTransformation.worker.Transformer;
 import utils.Config;
 
 import java.util.Calendar;
-import java.util.Map;
 
 
 public class Main {
