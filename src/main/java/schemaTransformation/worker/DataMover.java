@@ -179,7 +179,7 @@ public class DataMover {
                     path + separator + "anyOf");
 
             attributes.put(
-                    valueFieldName + nameSeparator + objectSuffix,
+                    objectSuffix,
                     "@" + lastInsertPrefix + attribute.getForeignRelationName());
 
         } else if (element.isJsonArray()) {
@@ -190,17 +190,17 @@ public class DataMover {
                     path + separator + "anyOf");
 
             attributes.put(
-                    valueFieldName + nameSeparator + arraySuffix,
+                    attribute.getForeignRelationName() + nameSeparator + arrayPKeyName,
                     getArrayID(attribute.getForeignRelationName()));
 
         } else {
             int type = Types.jsonElementToInt(element);
             attributes.put(
-                    valueFieldName + nameSeparator + Types.constantToString(type),
+                    Types.constantToString(type),
                     element);
 
             if (uniqueIndex && uniqueIndexHash && type == Types.TYPE_STRING) {
-                attributes.put(valueFieldName + nameSeparator + Types.constantToString(type) + nameSeparator + hashSuffix, "SHA2(" + element + ", 512)");
+                attributes.put(Types.constantToString(type) + nameSeparator + hashSuffix, "SHA2(" + element + ", 512)");
             }
         }
 

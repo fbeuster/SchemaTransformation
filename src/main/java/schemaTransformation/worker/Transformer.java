@@ -110,7 +110,7 @@ public class Transformer {
             Relation relation = makeBasicArrayRelation(name);
             relation.setType(Relation.TYPE_MULTI);
 
-            for (Attribute attribute : handleMultipleTypes(object.getAsJsonObject("items"), valueFieldName, relation.getName(), relation, true)) {
+            for (Attribute attribute : handleMultipleTypes(object.getAsJsonObject("items"), "", relation.getName(), relation, true)) {
                 JsonArray types = object.getAsJsonObject("items").getAsJsonArray("anyOf");
                 String path     = types.get(0).getAsJsonObject().get("path").getAsString();
 
@@ -162,7 +162,13 @@ public class Transformer {
             JsonObject type = element.getAsJsonObject();
 
             int attributeType       = Types.jsonToInt(type.get("type"));
-            String attributeName    = prepend + nameSeparator + Types.jsonToString(type.get("type"));
+            String attributeName;
+
+            if (prepend == "" || prepend == null) {
+                attributeName = Types.jsonToString(type.get("type"));
+            } else {
+                attributeName = prepend + nameSeparator + Types.jsonToString(type.get("type"));
+            }
 
             if (name == null) {
                 name = attributeName;
@@ -174,9 +180,10 @@ public class Transformer {
                 attributes.add( attribute );
 
             } else if (Types.jsonToInt(type.get("type")) == Types.TYPE_ARRAY) {
-                String orderName = name + nameSeparator + arraySuffix + nameSeparator + "order";
+                String orderName = name + nameSeparator + arraySuffix + nameSeparator + arraySuffix + nameSeparator + "order";
 
-                if (!fromArray) {
+                if (fromArray) {
+                    attributeName = name + nameSeparator + arraySuffix + nameSeparator + arrayPKeyName;
                     name += nameSeparator + arraySuffix;
                 }
 
@@ -209,7 +216,7 @@ public class Transformer {
 
         } else if (attributeType == Types.TYPE_ARRAY) {
             String orderName = attributeName + nameSeparator + arraySuffix + nameSeparator + "order";
-            attributeName += nameSeparator + arraySuffix + nameSeparator + primaryKeyName;
+            attributeName += nameSeparator + arrayPKeyName;
 
             Attribute attribute = new Attribute(uniqueAttributeName(relation, attributeName), attributeType);
             attribute.setForeignRelationName( handleArrayRelations(propertyName, property) );
@@ -239,7 +246,7 @@ public class Transformer {
     }
 
     private Relation makeBasicArrayRelation(String name) {
-        Relation relation   = new Relation( uniqueRelationName(name + nameSeparator + arraySuffix) );
+        Relation relation   = new Relation( uniqueRelationName(name) );
         relation.addAttribtue(new Attribute(arrayPKeyName, Types.TYPE_ARRAY_ID));
         relation.addAttribtue(new Attribute(orderFieldName, Types.TYPE_ARRAY_ORDER));
         relation.addPrimaryKey(arrayPKeyName);
