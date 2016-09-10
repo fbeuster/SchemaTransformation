@@ -78,13 +78,14 @@ public class Transformer {
 
             } else {
                 /** single type attribute **/
-                Attribute attribute = handleSingleType(attributeName, entry.getKey(), property, relation);
-                relation.addAttribtue( attribute );
-                dataMapper.add( property.get("path").getAsString(), relation.getName(), attribute );
+                for (Attribute attribute : handleSingleType(attributeName, entry.getKey(), property, relation)) {
+                    relation.addAttribtue( attribute );
+                    dataMapper.add( property.get("path").getAsString(), relation.getName(), attribute );
 
-                if (uniqueIndex && uniqueIndexHash &&
-                        attribute.getType() == Types.TYPE_STRING) {
-                    relation.addAttribtue(new Attribute(attribute.getName() + nameSeparator + hashSuffix, Types.TYPE_HASH));
+                    if (uniqueIndex && uniqueIndexHash &&
+                            attribute.getType() == Types.TYPE_STRING) {
+                        relation.addAttribtue(new Attribute(attribute.getName() + nameSeparator + hashSuffix, Types.TYPE_HASH));
+                    }
                 }
             }
         }
@@ -167,50 +168,60 @@ public class Transformer {
                 name = attributeName;
             }
 
-            String foreign = null;
-
             if (Types.jsonToInt(type.get("type")) == Types.TYPE_OBJECT) {
-                foreign = makeRelation( name + nameSeparator + objectSuffix, type.getAsJsonObject("properties"));
+                Attribute attribute = new Attribute( uniqueAttributeName(relation, attributeName), attributeType );
+                attribute.setForeignRelationName( makeRelation( name + nameSeparator + objectSuffix, type.getAsJsonObject("properties")) );
+                attributes.add( attribute );
 
             } else if (Types.jsonToInt(type.get("type")) == Types.TYPE_ARRAY) {
+                String orderName = name + nameSeparator + arraySuffix + nameSeparator + "order";
+
                 if (!fromArray) {
                     name += nameSeparator + arraySuffix;
                 }
-                foreign = handleArrayRelations( name, type );
+
+                Attribute attribute = new Attribute( uniqueAttributeName(relation, attributeName), attributeType );
+                attribute.setForeignRelationName( handleArrayRelations( name, type ) );
+                attributes.add( attribute );
+
+                attributes.add( new Attribute(orderName, Types.TYPE_ORDER) );
+
+            } else {
+                attributes.add( new Attribute( uniqueAttributeName(relation, attributeName), attributeType ) );
             }
-
-            Attribute attribute = new Attribute( uniqueAttributeName(relation, attributeName), attributeType );
-
-            if (foreign != null) {
-                attribute.setForeignRelationName(foreign);
-            }
-
-            attributes.add( attribute );
         }
 
         return attributes;
     }
 
-    private Attribute handleSingleType(String attributeName, String propertyName, JsonObject property, Relation relation) {
+    private ArrayList<Attribute> handleSingleType(String attributeName, String propertyName, JsonObject property, Relation relation) {
+        ArrayList<Attribute> attributes = new ArrayList<>();
+
         int attributeType = Types.jsonToInt(property.get("type"));
-        String foreign = null;
 
         if (attributeType == Types.TYPE_OBJECT) {
             attributeName += primaryKeyName;
-            foreign = makeRelation(propertyName, property.getAsJsonObject("properties"));
+
+            Attribute attribute = new Attribute(uniqueAttributeName(relation, attributeName), attributeType);
+            attribute.setForeignRelationName( makeRelation(propertyName, property.getAsJsonObject("properties")) );
+
+            attributes.add(attribute);
 
         } else if (attributeType == Types.TYPE_ARRAY) {
+            String orderName = attributeName + nameSeparator + arraySuffix + nameSeparator + "order";
             attributeName += nameSeparator + arraySuffix + primaryKeyName;
-            foreign = handleArrayRelations(propertyName, property);
+
+            Attribute attribute = new Attribute(uniqueAttributeName(relation, attributeName), attributeType);
+            attribute.setForeignRelationName( handleArrayRelations(propertyName, property) );
+
+            attributes.add(attribute);
+            attributes.add( new Attribute(orderName, Types.TYPE_ORDER) );
+
+        } else {
+            attributes.add(new Attribute(uniqueAttributeName(relation, attributeName), attributeType));
         }
 
-        Attribute ret = new Attribute(uniqueAttributeName(relation, attributeName), attributeType);
-
-        if (foreign != null) {
-            ret.setForeignRelationName(foreign);
-        }
-
-        return ret;
+        return attributes;
     }
 
     private void loadConfig() {

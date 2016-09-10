@@ -156,6 +156,10 @@ public class DataMover {
             } else {
                 attributes.put(attribute.getName(), parseObjectProperty(attribute, property, path));
 
+                if (attribute.getType() == Types.TYPE_ARRAY) {
+                    attributes.put(property.getKey() + nameSeparator + arraySuffix + nameSeparator + "order", 0);
+                }
+
                 if (uniqueIndex && uniqueIndexHash && attribute.getType() == Types.TYPE_STRING) {
                     attributes.put(attribute.getName() + nameSeparator + hashSuffix, "SHA2(" + property.getValue() + ", 512)");
                 }
@@ -277,6 +281,10 @@ public class DataMover {
             } else {
                 relationName = dataMapping.getRelationName(path + separator + property.getKey(), type);
                 attributes.put(attribute.getName(), parseObjectProperty(attribute, property, path));
+
+                if (attribute.getType() == Types.TYPE_ARRAY) {
+                    attributes.put(property.getKey() + nameSeparator + arraySuffix + nameSeparator + "order", 0);
+                }
 
                 if (uniqueIndex && uniqueIndexHash && attribute.getType() == Types.TYPE_STRING) {
                     attributes.put(attribute.getName() + nameSeparator + hashSuffix, "SHA2(" + property.getValue() + ", 512)");

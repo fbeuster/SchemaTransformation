@@ -17,7 +17,8 @@ public class Types {
     public static int TYPE_NULL         = 6;
     public static int TYPE_NUMBER       = 7;
     public static int TYPE_OBJECT       = 8;
-    public static int TYPE_STRING       = 9;
+    public static int TYPE_ORDER        = 9;
+    public static int TYPE_STRING       = 10;
 
     public static String SQL_ARRAY          = "INT";
     public static String SQL_ARRAY_ID       = "INT";
@@ -28,6 +29,7 @@ public class Types {
     public static String SQL_NULL           = "INT";
     public static String SQL_NUMBER         = "DOUBLE";
     public static String SQL_OBJECT         = "INT";
+    public static String SQL_ORDER          = "INT";
     public static String SQL_STRING         = "MEDIUMTEXT";
 
     public static String STRING_ARRAY       = "array";
@@ -39,6 +41,7 @@ public class Types {
     public static String STRING_NULL        = "null";
     public static String STRING_NUMBER      = "number";
     public static String STRING_OBJECT      = "object";
+    public static String STRING_ORDER       = "order";
     public static String STRING_STRING      = "string";
 
     public static String constantToSQL(int type) {
@@ -50,6 +53,7 @@ public class Types {
         } else if ( type == TYPE_ID         ) { return SQL_ID;
         } else if ( type == TYPE_NUMBER     ) { return SQL_NUMBER;
         } else if ( type == TYPE_OBJECT     ) { return SQL_OBJECT;
+        } else if ( type == TYPE_ORDER      ) { return SQL_ORDER;
         } else if ( type == TYPE_STRING     ) { return SQL_STRING;
         } else {                                return SQL_NULL;
         }
@@ -64,6 +68,7 @@ public class Types {
         } else if ( type == TYPE_ID         ) { return STRING_ID;
         } else if ( type == TYPE_NUMBER     ) { return STRING_NUMBER;
         } else if ( type == TYPE_OBJECT     ) { return STRING_OBJECT;
+        } else if ( type == TYPE_ORDER      ) { return STRING_ORDER;
         } else if ( type == TYPE_STRING     ) { return STRING_STRING;
         } else {                                return STRING_NULL;
         }
