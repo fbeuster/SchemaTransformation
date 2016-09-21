@@ -37,33 +37,35 @@ public class Relation {
     }
 
     private String foreignKeys(Config config) {
-        String keyString = "";
+        if (config.getBoolean("sql.foreign_key_constraints")) {
+            String keyString = "";
 
-        for (Attribute a : attributes) {
-            if (a.getType() == Types.TYPE_ARRAY) {
-                String key_name                 = "fk" + config.getString("transformation.fields.name_separator") + a.getName();
-                String referenced_attributes    = "`" + config.getString("transformation.fields.array_pkey_name") + "`, `" + config.getString("transformation.fields.order_field_name") + "`";
-                String referenced_relation      = a.getForeignRelationName();
-                String referencing_attributes   = "`" + a.getName() + "`, `" + a.getForeignRelationName() + config.getString("transformation.fields.name_separator") + config.getString("transformation.fields.order_field_name") + "`";
+            for (Attribute a : attributes) {
+                if (a.getType() == Types.TYPE_ARRAY) {
+                    String key_name = "fk" + config.getString("transformation.fields.name_separator") + a.getName();
+                    String referenced_attributes = "`" + config.getString("transformation.fields.array_pkey_name") + "`, `" + config.getString("transformation.fields.order_field_name") + "`";
+                    String referenced_relation = a.getForeignRelationName();
+                    String referencing_attributes = "`" + a.getName() + "`, `" + a.getForeignRelationName() + config.getString("transformation.fields.name_separator") + config.getString("transformation.fields.order_field_name") + "`";
 
-                keyString += " FOREIGN KEY `" + key_name + "`(" + referencing_attributes + ")";
-                keyString += " REFERENCES `" + referenced_relation + "`(" + referenced_attributes + ")";
-                keyString += " ON UPDATE CASCADE ON DELETE SET NULL, ";
+                    keyString += " FOREIGN KEY `" + key_name + "`(" + referencing_attributes + ")";
+                    keyString += " REFERENCES `" + referenced_relation + "`(" + referenced_attributes + ")";
+                    keyString += " ON UPDATE CASCADE ON DELETE SET NULL, ";
 
-            } else if (a.getType() == Types.TYPE_OBJECT) {
-                String key_name                 = "fk" + config.getString("transformation.fields.name_separator") + a.getName();
-                String referenced_attribute     = config.getString("transformation.fields.primary_key_name");
-                String referenced_relation      = a.getForeignRelationName();
-                String referencing_attribute    = a.getName();
+                } else if (a.getType() == Types.TYPE_OBJECT) {
+                    String key_name = "fk" + config.getString("transformation.fields.name_separator") + a.getName();
+                    String referenced_attribute = config.getString("transformation.fields.primary_key_name");
+                    String referenced_relation = a.getForeignRelationName();
+                    String referencing_attribute = a.getName();
 
-                keyString += " FOREIGN KEY `" + key_name + "`(`" + referencing_attribute + "`)";
-                keyString += " REFERENCES `" + referenced_relation + "`(`" + referenced_attribute + "`)";
-                keyString += " ON UPDATE CASCADE ON DELETE SET NULL, ";
+                    keyString += " FOREIGN KEY `" + key_name + "`(`" + referencing_attribute + "`)";
+                    keyString += " REFERENCES `" + referenced_relation + "`(`" + referenced_attribute + "`)";
+                    keyString += " ON UPDATE CASCADE ON DELETE SET NULL, ";
+                }
             }
-        }
 
-        if (keyString.length() > 0) {
-            return ", " + keyString.substring(0, keyString.length() - 2);
+            if (keyString.length() > 0) {
+                return ", " + keyString.substring(0, keyString.length() - 2);
+            }
         }
 
         return "";

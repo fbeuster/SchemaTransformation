@@ -52,6 +52,7 @@ sql:
   database: database
   debug: false
   drop_tables: false
+  foreign_key_constraints: true
   host: localhost
   password: password
   port: 3306
